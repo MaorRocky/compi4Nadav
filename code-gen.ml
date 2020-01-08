@@ -250,6 +250,7 @@ let  generate consts fvars e  =
     then (mainGenerate (List.hd lst) env)^(or_helper( (List.tl lst)) e' ind env)
     else
       (mainGenerate (List.hd lst) env)^"cmp rax, sob_false\njne Lexit"^(string_of_int ind)^"\n"^(or_helper ((List.tl lst)) e' ind env)
+
   and if_helper test dit dif env ind =
     (mainGenerate test env) ^ "\n" ^
     "cmp rax, SOB_FALSE_ADDRESS\n" ^
@@ -285,7 +286,13 @@ let  generate consts fvars e  =
     |If' (test, dit, dif) -> 
       let ind = increment_index () in
       (if_helper test dit dif env ind)
-
+    |BoxGet' (v) -> (mainGenerate (Var'(v)) env)  ^ "\n" ^
+                    "mov rax, qword [rax]\n"
+    |BoxSet' (v, value) -> (mainGenerate value env) ^ "\n" ^
+                           "push rax\n" ^
+                           (mainGenerate (Var'(v)) env) ^ "\n" ^
+                           "pop qword [rax]\n" ^ 
+                           "mov rax, sob_void\n"
   in mainGenerate e 0;;
 
 module Code_Gen : CODE_GEN = struct
