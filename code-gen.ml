@@ -11,21 +11,21 @@ module type CODE_GEN = sig
        * the offset from the base const_table address in bytes; and
        * a string containing the byte representation (or a sequence of nasm macros)
          of the constant value
-       For example: [(Sexpr(Nil), (1, "SOB_NIL"))]
-  *)
+     For example: [(Sexpr(Nil), (1, "SOB_NIL"))]
+   *)
   val make_consts_tbl : expr' list -> (constant * (int * string)) list
 
   (* This signature assumes the structure of the fvars table is
      a list of key-value pairs:
      - The keys are the fvar names as strings
      - The values are the offsets from the base fvars_table address in bytes
-       For example: [("boolean?", 0)]
-  *)  
+     For example: [("boolean?", 0)]
+   *)  
   val make_fvars_tbl : expr' list -> (string * int) list
 
   (* This signature represents the idea of outputing assembly code as a string
      for a single AST', given the full constants and fvars tables. 
-  *)
+   *)
   val generate : (constant * (int * string)) list -> (string * int) list -> expr' -> string
 end;;
 
@@ -65,7 +65,7 @@ let rec get_all_sexps expr'=
   let rec func expr' = 
     match expr' with
     | Const'(Sexpr(sexp)) -> (let a = global_lst := List.append !global_lst [sexp] in
-                              just_ret_unit a)
+                       just_ret_unit a)
     | Const'(Void) -> ()
     | Var'(var) -> ()
     | Box'(var) -> ()
@@ -84,10 +84,14 @@ let rec get_all_sexps expr'=
     | ApplicTP'(operator, args) -> (let a = [func operator] in
                                     let b = List.map func args in
                                     just_ret_unit [a; b]) in
-
+    
   let just_a_unit = func expr' in
   car !global_lst just_a_unit
-;;
+  ;;
+
+let get_all_sexp_multiple_asts asts = 
+  let list_of_sexp_lists = List.map get_all_sexps asts in
+  List.flatten list_of_sexp_lists;;
 
 let unique_cons xs x = 
   if List.mem x xs 
@@ -103,7 +107,7 @@ let rec expand_sexp sexp =
   | Bool(false) -> []
   | Bool(true) -> []
   | Symbol(a) -> [String(a); Symbol(a)]
-  (*| TaggedSexpr(name, sexpr) -> [Pair(name)]*)
+  | TaggedSexpr(name, sexpr) -> expand_sexp sexpr
   | Pair(a, b) -> List.append (List.append (expand_sexp a) (expand_sexp b)) [sexp]
   | _ -> [sexp];;
 
@@ -112,24 +116,51 @@ let rec expand_list lst =
   then lst
   else List.append (expand_sexp (List.hd lst)) (expand_list (List.tl lst))
 
-let rec from_sexp_lst_to_const_tbl lst =
+let rec find_sexp_by_ref_name ref_name tuple_lst index = 
+  match tuple_lst with
+  | (name, sexp) :: rest when ref_name = name -> index
+  | (name, sexp) :: rest -> find_sexp_by_ref_name ref_name rest (index + 1) 
+  | [] -> (-1)
+
+let rec from_sexp_lst_to_const_tbl tagged_tuple_lst lst =
   let global_lst = ref [(Void, (0, "MAKE_VOID")); (Sexpr(Nil), (1, "MAKE_NIL"));
                         (Sexpr(Bool(false)), (2, "MAKE_BOOL(0)")); (Sexpr(Bool(true)), (4, "MAKE_BOOL(1)"))] in
+  let rec get_offset_of_sexp_2 sexp const_tbl = 
+    match const_tbl with
+    | (Sexpr(sexpr), (offset, representation)) :: rest when (sexpr_eq sexpr sexp) -> offset
+    | tuple :: rest -> get_offset_of_sexp_2 sexp rest
+    | [] -> (-1) in
+  let get_tag_ref_offset_2 name = 
+    let index = find_sexp_by_ref_name name tagged_tuple_lst 0 in
+    if index = (-1)
+    then (raise X_this_should_not_happen)
+    else (let (ref_name, sexpr) = List.nth tagged_tuple_lst index in
+          get_offset_of_sexp_2 sexpr !global_lst) in
   let add_next_tuple sexp =
     let rec get_offset_of_sexp sexp const_tbl = 
-      match const_tbl with
-      | (Sexpr(sexpr), (offset, representation)) :: rest when (sexpr_eq sexpr sexp) -> offset
-      | tuple :: rest -> get_offset_of_sexp sexp rest
-      | [] -> (-1) in
-    let get_next_offset = 
-      let last_tuple = List.nth !global_lst ((List.length !global_lst) - 1) in
-      match last_tuple with
-      | (Sexpr(Bool(_)), (offset, representation)) -> offset + 2
-      | (Sexpr(Char(_)), (offset, representation)) -> offset + 2
-      | (Sexpr(Number(_)), (offset, representation)) -> offset + 9
-      | (Sexpr(String(str)), (offset, representation)) -> offset + 9 + (String.length str)
-      | (Sexpr(Symbol(str)), (offset, representation)) -> offset + 9
-      | (Sexpr(Pair(car, cdr)), (offset, representation)) -> offset + 17 in
+        match const_tbl with
+        | (Sexpr(sexpr), (offset, representation)) :: rest when (sexpr_eq sexpr sexp) -> offset
+        | tuple :: rest -> get_offset_of_sexp sexp rest
+        | [] -> (-1) in
+    let get_tag_ref_offset name = 
+      let index = find_sexp_by_ref_name name tagged_tuple_lst 0 in
+      if index = (-1)
+      then (raise X_this_should_not_happen)
+      else (let (ref_name, sexpr) = List.nth tagged_tuple_lst index in
+            get_offset_of_sexp sexpr !global_lst) in
+    let get_next_offset =
+        let last_tuple = List.nth !global_lst ((List.length !global_lst) - 1) in
+        match last_tuple with
+        | (Void, (offset, representation)) -> offset + 1 (*this should not happen*) 
+        | (Sexpr(Nil), (offset, representation)) -> offset + 1 (*this should not happen*) 
+        | (Sexpr(Bool(_)), (offset, representation)) -> offset + 2
+        | (Sexpr(Char(_)), (offset, representation)) -> offset + 2
+        | (Sexpr(Number(_)), (offset, representation)) -> offset + 9
+        | (Sexpr(String(str)), (offset, representation)) -> offset + 9 + (String.length str)
+        | (Sexpr(Symbol(str)), (offset, representation)) -> offset + 9
+        | (Sexpr(Pair(car, cdr)), (offset, representation)) -> offset + 17 
+        | (Sexpr(TaggedSexpr(name, sepxr)), (offset, representation)) -> offset (*this should not happen*)
+        | (Sexpr(TagRef(name)), (offset, representation)) -> offset (*this should not happen*) in
     let offset = (get_next_offset) in
     match sexp with
     | Bool(true) -> (global_lst := !global_lst)
@@ -138,21 +169,62 @@ let rec from_sexp_lst_to_const_tbl lst =
     | Number(Int(num)) -> (global_lst := List.append !global_lst [(Sexpr(sexp), (offset, "MAKE_LITERAL_INT("^string_of_int num^")"))])
     | Number(Float(num)) -> (global_lst := List.append !global_lst [(Sexpr(sexp), (offset, "MAKE_LITERAL_INT("^string_of_float num^")"))])
     | Char(ch) -> (global_lst := List.append !global_lst 
-                       [(Sexpr(sexp), (offset, "MAKE_LITERAL_CHAR("^string_of_int(int_of_char(ch))^")"))])
+                                        [(Sexpr(sexp), (offset, "MAKE_LITERAL_CHAR("^string_of_int(int_of_char(ch))^")"))])
     | String(str) -> (global_lst := List.append !global_lst [(Sexpr(sexp), (offset, "MAKE_LITERAL_STRING("^str^")"))])
     | Symbol(str) -> (let symbol_offset = get_offset_of_sexp (String(str)) !global_lst in
                       global_lst := List.append !global_lst 
-                          [(Sexpr(sexp), (offset, "MAKE_LITERAL_SYMBOL(consts+"^string_of_int(symbol_offset)^")"))])
-    | Pair(car, cdr) -> (let car_offset = string_of_int(get_offset_of_sexp car !global_lst) in
-                         let cdr_offset = string_of_int(get_offset_of_sexp cdr !global_lst) in
+                                [(Sexpr(sexp), (offset, "MAKE_LITERAL_SYMBOL(consts+"^string_of_int(symbol_offset)^")"))])
+    | Pair(car, cdr) -> (let car_offset = (match car with
+                                           | TaggedSexpr(name, sexp1) -> string_of_int(get_offset_of_sexp sexp1 !global_lst)
+                                           | TagRef(name) -> (string_of_int((get_tag_ref_offset name)))
+                                           | _ -> string_of_int(get_offset_of_sexp car !global_lst)) in
+                         let cdr_offset = (match cdr with
+                                           | TaggedSexpr(name, sexp1) -> string_of_int(get_offset_of_sexp sexp1 !global_lst)
+                                           | TagRef(name) -> string_of_int((get_tag_ref_offset name))
+                                           | _ -> string_of_int(get_offset_of_sexp cdr !global_lst)) in
                          global_lst := List.append !global_lst 
-                             [(Sexpr(sexp), (offset, "MAKE_LITERAL_PAIR(consts+"^car_offset^", consts+"^cdr_offset^")"))]) in
+                                        [(Sexpr(sexp), (offset, "MAKE_LITERAL_PAIR(consts+"^car_offset^", consts+"^cdr_offset^")"))])
+    | _ -> global_lst := List.append !global_lst [] in
+  let rec repair_tag_refs_offsets const_tbl = 
+    match const_tbl with
+    | (Sexpr(Pair(car, TagRef(name))), (offset, str)) :: rest ->
+        (let str_tag_ref_offset = string_of_int((get_tag_ref_offset_2 name)) in
+        match car with
+        | TaggedSexpr(name, sexpr) ->
+          (Sexpr(Pair(car, TagRef(name))), (offset, "MAKE_LITERAL_PAIR(consts+"^string_of_int((get_offset_of_sexp_2 sexpr !global_lst))^", consts+"^str_tag_ref_offset^")")) :: 
+          (repair_tag_refs_offsets rest)
+        | _ ->
+          (Sexpr(Pair(car, TagRef(name))), (offset, "MAKE_LITERAL_PAIR(consts+"^string_of_int((get_offset_of_sexp_2 car !global_lst))^", consts+"^str_tag_ref_offset^")")) :: 
+          (repair_tag_refs_offsets rest))
+    | tuple :: rest -> tuple :: (repair_tag_refs_offsets rest)
+    | [] -> [] in
   let dont_care = List.map add_next_tuple lst in
-  car !global_lst dont_care;;
+  let ret = repair_tag_refs_offsets !global_lst in
+  car ret dont_care;;
 
-let my_func = fun str -> from_sexp_lst_to_const_tbl (remove_dups_from_left (expand_list (remove_dups_from_left (get_all_sexps (my_run (my_tag (my_read_sexpr str)))))))
+let collect_all_tagged_sexps sexp_lst = 
+  let tagged_sexps = ref [] in
+  let rec collect lst = 
+    match lst with
+    | TaggedSexpr(name, sexp) :: rest -> (let a = tagged_sexps := List.append !tagged_sexps [(name, sexp)] in
+                                          if a = ()
+                                          then (collect (List.append [sexp] rest))
+                                          else ())
+    | Pair(car, cdr) :: rest -> collect (List.append [car; cdr] rest)
+    | sexp :: rest -> collect rest
+    | [] -> () in
+  let just_a_unit = collect sexp_lst in
+  car !tagged_sexps just_a_unit;;
 
-let check_tags = fun str -> rename_tags_all_asts (my_runs (my_tags (my_read_sexprs str)))
+(*let my_func = fun str -> 
+  let from_sexp_lst_to_const_tbl (remove_dups_from_left (expand_list (remove_dups_from_left (get_all_sexps (my_run (my_tag (my_read_sexpr str)))))))*)
+
+let check_tags = fun str ->
+  let sexps_list = get_all_sexp_multiple_asts (rename_tags_all_asts (my_runs (my_tags (my_read_sexprs str))) 0) in
+  let tagged_tuples_list = collect_all_tagged_sexps sexps_list in
+  let expanded_sexps_list = remove_dups_from_left (expand_list sexps_list) in
+  from_sexp_lst_to_const_tbl tagged_tuples_list expanded_sexps_list
+  (*from_sexp_lst_to_const_tbl (remove_dups_from_left (expand_list (remove_dups_from_left (get_all_sexp_multiple_asts (rename_tags_all_asts (my_runs (my_tags (my_read_sexprs str))))))))*)
 
 (* get_all_sexps (boxing (tail_cals false (lexical_addresses [] [] false ()))) *)
 
@@ -222,16 +294,18 @@ let rec getIndex_fvars fvars_table fvar_name =
     then fvar_index
     else getIndex_fvars (List.tl fvars_table) fvar_name ;;
 (* NADAV you might need to change it im not sure how const table is set up *)
+
 let getIndex_const_table const const_table =
-  let (sexp,(index,str)) =  
-    (List.find (fun (sexp,(address,str)) -> sexpr_eq sexp const) const_table) in
+  let (sexp, (offset, str)) =  
+    (List.find (fun (sexp, (address,str)) -> sexpr_eq sexp const) const_table) in
   index;;
 
 (* global index *)
 let index = ref 0;;
 
 let increment_index =
-  fun () -> index := !index + 1; !index - 1;;
+  fun () -> index := !index + 1 in
+            !index - 1;;
 (* the main method 
    im not sure about the paremeters of the function*)
 let  generate consts fvars e  =
@@ -241,7 +315,6 @@ let  generate consts fvars e  =
      then ""
      else
       (mainGenerate (List.hd lst) i )^"push rax\n"^(applic_helper (List.tl lst) i) 
-
   *)
   let rec or_helper lst e' ind env =
     if List.length lst < 1 
@@ -257,7 +330,7 @@ let  generate consts fvars e  =
     "cmp rax, SOB_FALSE_ADDRESS\n" ^
     "je Lelse_" ^ (string_of_int ind) ^ "\n" ^  
     (mainGenerate dit env) ^ "\n" ^
-    "jmp Lexit_" ^ (string_of_int ind) ^ "\n" ^ 
+    "jmp Lexit_" ^ (string_of_int ind) ^ "\n" ^
     "Lelse_" ^ (string_of_int ind) ^ ":\n" ^
     (mainGenerate dif env) ^ "\n" ^
     "Lexit_" ^ (string_of_int ind) ^ ":\n"
@@ -319,7 +392,6 @@ let  generate consts fvars e  =
     and mainGenerate e env = 
       match e with        
       | Const'(Sexpr(c)) -> let i = (getIndex_const_table c consts) in "mov rax, const_tbl+"^(string_of_int i)^"\n"
-      (* NADAV: WHAT SHOULD WE DO IF INDEX IS -1? *)
       | Var'(VarParam(_, minor)) -> "mov qword rax, [rbp + "^(string_of_int (8*(minor+4)))^"]\n"
       | Set'(Var'(VarParam(_, minor)), e') ->   (* NOT THE SAME AS e as e' *)
         (mainGenerate e' env) ^"mov qword [rbp + "^(string_of_int (8*(4+minor)))^"], rax\nmov rax, sob_void\n"
@@ -351,8 +423,21 @@ let  generate consts fvars e  =
       |LambdaSimple'(params, body) -> lambda_helper params body env
     in mainGenerate e 0;;
 
+
+
+let make_consts_tbl_2 asts = 
+    let sexps_list = get_all_sexp_multiple_asts (rename_tags_all_asts asts 0) in
+    let tagged_tuples_list = collect_all_tagged_sexps sexps_list in
+    let expanded_sexps_list = remove_dups_from_left (expand_list sexps_list) in
+    from_sexp_lst_to_const_tbl tagged_tuples_list expanded_sexps_list;;
+
+
 module Code_Gen : CODE_GEN = struct
-  let make_consts_tbl asts = raise X_not_yet_implemented;;
+  let make_consts_tbl asts = 
+    let sexps_list = get_all_sexp_multiple_asts (rename_tags_all_asts asts 0) in
+    let tagged_tuples_list = collect_all_tagged_sexps sexps_list in
+    let expanded_sexps_list = remove_dups_from_left (expand_list sexps_list) in
+    from_sexp_lst_to_const_tbl tagged_tuples_list expanded_sexps_list;;
   let make_fvars_tbl asts = raise X_not_yet_implemented;;
   let generate consts fvars e = raise X_not_yet_implemented;;
 end;;
