@@ -144,6 +144,33 @@
 %define MAKE_CLOSURE(r, env, body) \
         MAKE_TWO_WORDS r, T_CLOSURE, env, body
 
+%macro MAKE_LITERAL 2 
+	db %1
+	%2
+%endmacro
+
+%define MAKE_LITERAL_INT(val) MAKE_LITERAL T_INTEGER, dq val
+
+%define MAKE_LITERAL_CHAR(val) MAKE_LITERAL T_CHAR, db val
+
+%define MAKE_NIL db T_NIL
+
+%define MAKE_VOID db T_VOID
+
+%define MAKE_BOOL(val) MAKE_LITERAL T_BOOL, db val
+
+%macro MAKE_LITERAL_STRING 2
+	db T_STRING
+	dq %2
+	db %1
+%endmacro
+
+%macro MAKE_LITERAL_SYMBOL 1
+	db T_SYMBOL
+	dq %1
+%endmacro
+
+
 	
 extern printf, malloc
 global write_sob, write_sob_if_not_void

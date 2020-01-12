@@ -270,7 +270,7 @@ and letrec_body args body =
 
 let my_tag sexp = tag_parser sexp;;
 
-let my_tags sexpr = (List.map my_tag sexpr)
+let my_tags sexprs = (List.map my_tag sexprs)
 
 module Tag_Parser : TAG_PARSER = struct
 

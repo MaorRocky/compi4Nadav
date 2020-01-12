@@ -10,6 +10,8 @@ let string_to_asts s = List.map Semantics.run_semantics
                          (Tag_Parser.tag_parse_expressions
                             (Reader.read_sexprs s));;
 
+(*let string_to_asts s = my_runs (tag_parse_expressions (read_sexprs s));;*)
+
 let primitive_names_to_labels = 
   ["boolean?", "is_boolean"; "float?", "is_float"; "integer?", "is_integer"; "pair?", "is_pair";
    "null?", "is_null"; "char?", "is_char"; "string?", "is_string";
@@ -25,7 +27,7 @@ let make_prologue consts_tbl fvars_tbl =
     (* Adapt the addressing here to your fvar addressing scheme:
        This imlementation assumes fvars are offset from the base label fvar_tbl *)
 "    MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, " ^ label  ^ ")
-    mov [fvar_tbl+" ^  (string_of_int (List.assoc prim fvars_tbl)) ^ "], rax" in
+    mov [fvar_tbl+8*" ^  (string_of_int ((List.assoc prim fvars_tbl))) ^ "], rax" in
   let constant_bytes (c, (a, s)) = s in
 "
 ;;; All the macros and the scheme-object printing procedure
@@ -99,8 +101,8 @@ let epilogue = "";;
 exception X_missing_input_file;;
 
 try
-  let infile = Sys.argv.(1) in
-  let code =  (file_to_string "stdlib.scm") ^ (file_to_string infile) in
+  let infile = "foo.scm" (*Sys.argv.(1)*) in
+  let code =  (*(file_to_string "stdlib.scm")^*) (file_to_string infile) in
   let asts = string_to_asts code in
   let consts_tbl = Code_Gen.make_consts_tbl asts in
   let fvars_tbl = Code_Gen.make_fvars_tbl asts in

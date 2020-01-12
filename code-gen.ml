@@ -29,9 +29,15 @@ module type CODE_GEN = sig
   val generate : (constant * (int * string)) list -> (string * int) list -> expr' -> string
 end;;
 
+(*General*)
+
 let just_ret_unit = fun x -> ()
 
 let car = fun x y -> x
+
+(*END OF GENERAL*)
+
+(*CONSTANTS TABLE*)
 
 let rec rename_tags_all_asts asts num =
   let rec rename_tags_sexp sexp str_num =
@@ -170,10 +176,10 @@ let rec from_sexp_lst_to_const_tbl tagged_tuple_lst lst =
     | Number(Float(num)) -> (global_lst := List.append !global_lst [(Sexpr(sexp), (offset, "MAKE_LITERAL_INT("^string_of_float num^")"))])
     | Char(ch) -> (global_lst := List.append !global_lst 
                                         [(Sexpr(sexp), (offset, "MAKE_LITERAL_CHAR("^string_of_int(int_of_char(ch))^")"))])
-    | String(str) -> (global_lst := List.append !global_lst [(Sexpr(sexp), (offset, "MAKE_LITERAL_STRING("^str^")"))])
+    | String(str) -> (global_lst := List.append !global_lst [(Sexpr(sexp), (offset, "MAKE_LITERAL_STRING \""^str^"\","^string_of_int(String.length str)^""))])
     | Symbol(str) -> (let symbol_offset = get_offset_of_sexp (String(str)) !global_lst in
                       global_lst := List.append !global_lst 
-                                [(Sexpr(sexp), (offset, "MAKE_LITERAL_SYMBOL(consts+"^string_of_int(symbol_offset)^")"))])
+                                [(Sexpr(sexp), (offset, "MAKE_LITERAL_SYMBOL(const_tbl+"^string_of_int(symbol_offset)^")"))])
     | Pair(car, cdr) -> (let car_offset = (match car with
                                            | TaggedSexpr(name, sexp1) -> string_of_int(get_offset_of_sexp sexp1 !global_lst)
                                            | TagRef(name) -> (string_of_int((get_tag_ref_offset name)))
@@ -183,7 +189,7 @@ let rec from_sexp_lst_to_const_tbl tagged_tuple_lst lst =
                                            | TagRef(name) -> string_of_int((get_tag_ref_offset name))
                                            | _ -> string_of_int(get_offset_of_sexp cdr !global_lst)) in
                          global_lst := List.append !global_lst 
-                                        [(Sexpr(sexp), (offset, "MAKE_LITERAL_PAIR(consts+"^car_offset^", consts+"^cdr_offset^")"))])
+                                        [(Sexpr(sexp), (offset, "MAKE_LITERAL_PAIR(const_tbl+"^car_offset^", const_tbl+"^cdr_offset^")"))])
     | _ -> global_lst := List.append !global_lst [] in
   let rec repair_tag_refs_offsets const_tbl = 
     match const_tbl with
@@ -191,10 +197,10 @@ let rec from_sexp_lst_to_const_tbl tagged_tuple_lst lst =
         (let str_tag_ref_offset = string_of_int((get_tag_ref_offset_2 name)) in
         match car with
         | TaggedSexpr(name, sexpr) ->
-          (Sexpr(Pair(car, TagRef(name))), (offset, "MAKE_LITERAL_PAIR(consts+"^string_of_int((get_offset_of_sexp_2 sexpr !global_lst))^", consts+"^str_tag_ref_offset^")")) :: 
+          (Sexpr(Pair(car, TagRef(name))), (offset, "MAKE_LITERAL_PAIR(const_tbl"^string_of_int((get_offset_of_sexp_2 sexpr !global_lst))^", const_tbl"^str_tag_ref_offset^")")) :: 
           (repair_tag_refs_offsets rest)
         | _ ->
-          (Sexpr(Pair(car, TagRef(name))), (offset, "MAKE_LITERAL_PAIR(consts+"^string_of_int((get_offset_of_sexp_2 car !global_lst))^", consts+"^str_tag_ref_offset^")")) :: 
+          (Sexpr(Pair(car, TagRef(name))), (offset, "MAKE_LITERAL_PAIR(const_tbl"^string_of_int((get_offset_of_sexp_2 car !global_lst))^", const_tbl"^str_tag_ref_offset^")")) :: 
           (repair_tag_refs_offsets rest))
     | tuple :: rest -> tuple :: (repair_tag_refs_offsets rest)
     | [] -> [] in
@@ -216,18 +222,20 @@ let collect_all_tagged_sexps sexp_lst =
   let just_a_unit = collect sexp_lst in
   car !tagged_sexps just_a_unit;;
 
-(*let my_func = fun str -> 
-  let from_sexp_lst_to_const_tbl (remove_dups_from_left (expand_list (remove_dups_from_left (get_all_sexps (my_run (my_tag (my_read_sexpr str)))))))*)
 
-let check_tags = fun str ->
-  let sexps_list = get_all_sexp_multiple_asts (rename_tags_all_asts (my_runs (my_tags (my_read_sexprs str))) 0) in
-  let tagged_tuples_list = collect_all_tagged_sexps sexps_list in
-  let expanded_sexps_list = remove_dups_from_left (expand_list sexps_list) in
-  from_sexp_lst_to_const_tbl tagged_tuples_list expanded_sexps_list
-  (*from_sexp_lst_to_const_tbl (remove_dups_from_left (expand_list (remove_dups_from_left (get_all_sexp_multiple_asts (rename_tags_all_asts (my_runs (my_tags (my_read_sexprs str))))))))*)
+let rec getOffset_const_table const const_table = 
+  match const_table with
+  | tuple :: rest -> (match tuple with
+                      | (Sexpr(sexp), (offset, str)) -> (if (sexpr_eq const sexp)
+                                                         then offset
+                                                         else (getOffset_const_table const rest))
+                      | (Void, (offset, str)) -> (getOffset_const_table const rest))
+  | [] -> (-1);; 
 
-(* get_all_sexps (boxing (tail_cals false (lexical_addresses [] [] false ()))) *)
 
+(*END OF CONSTANTS TABLE*)
+
+(*FREE-VARS TABLE*)
 
 let rec get_all_freeVars expr'=
   let global_lst = ref [] in
@@ -235,6 +243,7 @@ let rec get_all_freeVars expr'=
     match expr' with
     | Var'(VarFree(var)) -> (let a = global_lst := List.append !global_lst [var] in
                              just_ret_unit a)
+    | Var'(var) -> ()
     | Const'(Sexpr(sexp)) -> ()
     | Const'(Void) -> ()
     | Box'(var) -> ()
@@ -258,178 +267,159 @@ let rec get_all_freeVars expr'=
   car !global_lst just_a_unit
 ;;
 
+let get_all_fvars_multiple_asts asts = 
+  let list_of_fvars_lists = List.map get_all_freeVars asts in
+  List.flatten list_of_fvars_lists;;
+
+let getIndex_fvars fvars_table fvar_name =
+  try 
+    (let (name, index) = List.find (fun (name, index) -> String.equal fvar_name name) fvars_table in
+     index)
+  with Not_found -> (-1);;
+
 let create_free_vars_table asts =
-  let initial_fvars =[("boolean?",0); ("float?",1); ("integer?",2);
-                      ("pair?",3);("null?",4);("char?",5); ("vector?",6); ("string?",7);
-                      ("procedure?",8); ("symbol?",9);  ("string-length",10) ;
-                      ("string-ref",11) ; ( "string-set!",12); ("make-string",13);
-                      ("vector-length",14); ("vector-ref",15); ("vector-set!",16);
-                      ("make-vector",17);("symbol->string",18);("char->integer",19); 
-                      ("integer->char",20);  ("eq?",21);
-                      ("+",22); ("*",23); ("-",24); ("/",25); ("<",26 ); ("=",27);
-                      ("car",28); ("cdr",29);("set-car!",30);("set-cdr!",31); ("apply",32);("cons",33);
-                     ] in
-  let rec add_fvar_tuple fvars_to_add fvar_table index=
-    if List.length fvars_to_add < 1 (* Break *)
-    then fvar_table
-    else(
-      let head_fvar = List.hd fvars_to_add in
-      let fvar_table_names = List.map (fun (name,_)-> name) fvar_table in
-      if List.mem head_fvar fvar_table_names (* no need to add this fvar*)
-      then (add_fvar_tuple (List.tl fvars_to_add) fvar_table index) (* continue *)
-      else (* adding the fvar *)
-        (let newFvarTuple = (head_fvar,index) in
-         add_fvar_tuple (List.tl fvars_to_add) (List.append fvar_table [newFvarTuple]) (index + 1)))
-  in
-  let fvars_from_ast = (remove_dups_from_left(get_all_freeVars asts)) in
-  (add_fvar_tuple fvars_from_ast initial_fvars 34);;
-;; 
-(* find index of free var in fvars_table *)
-let rec getIndex_fvars fvars_table fvar_name =
-  if List.length fvars_table < 1 
-  then -1
-  else
-    let (name,fvar_index) = (List.hd fvars_table) in
-    if(String.equal name fvar_name) 
-    then fvar_index
-    else getIndex_fvars (List.tl fvars_table) fvar_name ;;
-(* NADAV you might need to change it im not sure how const table is set up *)
-
-let getIndex_const_table const const_table =
-  let (sexp, (offset, str)) =  
-    (List.find (fun (sexp, (address,str)) -> sexpr_eq sexp const) const_table) in
-  index;;
-
-(* global index *)
-let index = ref 0;;
-
-let increment_index =
-  fun () -> index := !index + 1 in
-            !index - 1;;
-(* the main method 
-   im not sure about the paremeters of the function*)
-let  generate consts fvars e  =
-  (* will be used to help us with applic *)
-  (* let rec applic_helper lst i =
-     if List.length lst < 1 
-     then ""
-     else
-      (mainGenerate (List.hd lst) i )^"push rax\n"^(applic_helper (List.tl lst) i) 
-  *)
-  let rec or_helper lst e' ind env =
-    if List.length lst < 1 
-    then "Lexit"^(string_of_int ind)^":\n" 
-    else
-    if  List.length lst = 1 
-    then (mainGenerate (List.hd lst) env)^(or_helper( (List.tl lst)) e' ind env)
-    else
-      (mainGenerate (List.hd lst) env)^"cmp rax, sob_false\njne Lexit"^(string_of_int ind)^"\n"^(or_helper ((List.tl lst)) e' ind env)
-
-  and if_helper test dit dif env ind =
-    (mainGenerate test env) ^ "\n" ^
-    "cmp rax, SOB_FALSE_ADDRESS\n" ^
-    "je Lelse_" ^ (string_of_int ind) ^ "\n" ^  
-    (mainGenerate dit env) ^ "\n" ^
-    "jmp Lexit_" ^ (string_of_int ind) ^ "\n" ^
-    "Lelse_" ^ (string_of_int ind) ^ ":\n" ^
-    (mainGenerate dif env) ^ "\n" ^
-    "Lexit_" ^ (string_of_int ind) ^ ":\n"
-
-  and lambda_helper params body env = (*  NADAV PUT COMMENTS *)
-    let ind = increment_index() in
-    let extend = 
-      if env < 1
-      then   
-        "MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode"^(string_of_int ind)^")\n
-        jmp Lcont"^(string_of_int ind)^"\n
-        Lcode"^(string_of_int ind)^":\n
-        push rbp\n
-        mov rbp, rsp\n
-        "^(mainGenerate body (env+1))^"
-        leave\n
-        ret\n
-        Lcont"^(string_of_int ind)^":\n"  
-      else
-        "MALLOC rbx, "^(string_of_int env)^" * WORD_SIZE
-        mov qword rcx, [rbp+16] ; now rcx holds a pointer to the env
-        mov rdx, "^(string_of_int env)^" ; depth of the env is now in rdx, will be used in loop counter
-        dec rdx
-        mov r10, 0 ; will use r10 to compare to 0
-        mov r9,1 ; will use r9 to multiply by 8
-        .loop: 
-          cmp r10, rdx
-          je .loop_end
-          mov qword r11, [rcx+8*r9]
-          mov qword [rbx+8*r9], r11
-          inc r9
-          dec rdx
-          jmp .loop
-        .loop_end:
-          mov qword r8, [rbp+24] ; r8 hold the args count
-          shl r8 3 ; n:=n*8 
-          MALLOC rax, r8
-          mov qword [rbx], rax 
-          mov rdx, r8 ; rdx holds the args count * 8, will be used in the loop
-        .create_loop:
-          cmp r10, rdx
-          je jmp .end_create_loop
-          mov qword r12, [rbp + 8 * (4+r10)]
-          mov qword [rax + **r10], r12
-          inc r10
-          jmp .create_loop
-        .end_create_loop:
-        MAKE_CLOSURE(rax, rbx, Lcode"^(string_of_int ind)^")
-        jmp Lcont"^(string_of_int ind)^"
-        Lcode"^(string_of_int ind)^":
-        push rbp
-        mov rbp, rsp
-        "^(mainGenerate body (env+1))^"
-        leave
-        ret
-        Lcont"^(string_of_int ind)^":\n"
+  let initial_fvars = [("boolean?",0); ("float?",1); ("integer?",2);
+                       ("pair?",3);("null?",4);("char?",5); ("vector?",6); ("string?",7);
+                       ("procedure?",8); ("symbol?",9);  ("string-length",10) ;
+                       ("string-ref",11) ; ( "string-set!",12); ("make-string",13);
+                       ("vector-length",14); ("vector-ref",15); ("vector-set!",16);
+                       ("make-vector",17);("symbol->string",18);("char->integer",19); 
+                       ("integer->char",20);  ("eq?",21);
+                       ("+",22); ("*",23); ("-",24); ("/",25); ("<",26 ); ("=",27);
+                       ("car",28); ("cdr",29);("set-car!",30);("set-cdr!",31); ("apply",32);("cons",33)
+                      ] in
+  let rec add_fvars_tuples fvars_table fvars_list_to_add = 
+    let add_single_tuple fvar_list fvar = 
+      let index = getIndex_fvars fvar_list fvar in
+      if index = (-1) 
+      (*there is no free var with that name in the current fvars table, hence adding it to the table*)
+      then List.append fvar_list [(fvar, (List.length fvar_list))]
+      else fvar_list in
+    match fvars_list_to_add with
+    | fvar_name :: rest -> add_fvars_tuples (add_single_tuple fvars_table fvar_name) rest
+    | [] -> fvars_table in
+  let fvars_from_ast = remove_dups_from_left (get_all_fvars_multiple_asts asts) in
+  add_fvars_tuples initial_fvars fvars_from_ast;;
 
 
-    and mainGenerate e env = 
-      match e with        
-      | Const'(Sexpr(c)) -> let i = (getIndex_const_table c consts) in "mov rax, const_tbl+"^(string_of_int i)^"\n"
-      | Var'(VarParam(_, minor)) -> "mov qword rax, [rbp + "^(string_of_int (8*(minor+4)))^"]\n"
-      | Set'(Var'(VarParam(_, minor)), e') ->   (* NOT THE SAME AS e as e' *)
-        (mainGenerate e' env) ^"mov qword [rbp + "^(string_of_int (8*(4+minor)))^"], rax\nmov rax, sob_void\n"
-      | Var'(VarBound(_, major, minor)) ->
-        "mov rax, qword [rbp + 16]\n"^
-        "mov rax, qword [rax + "^(string_of_int (major*8))^"]\n"^
-        "mov rax, qword [rax + "^(string_of_int (minor*8))^"]\n"
-      | Set'(Var'(VarBound(_, major, minor)), e') ->
-        (mainGenerate e' env)^
-        "mov rbx, qword [rbp + 8 ∗ 2]\n"^
+let rec my_generate consts fvars e = 
+  match e with
+  | Const'(Sexpr(expr)) -> (let str_offset = string_of_int (getOffset_const_table expr consts) in
+                            "mov rax, const_tbl+"^str_offset^"")
+  | _ -> "mov rax, 1"
+
+
+let make_consts_tbl_2 asts =
+  let sexps_list = get_all_sexp_multiple_asts (rename_tags_all_asts asts 0) in
+  let tagged_tuples_list = collect_all_tagged_sexps sexps_list in
+  let expanded_sexps_list = remove_dups_from_left (expand_list sexps_list) in
+  from_sexp_lst_to_const_tbl tagged_tuples_list expanded_sexps_list;;
+
+let check_const_table = fun str ->
+  let sexps_list = get_all_sexp_multiple_asts (rename_tags_all_asts (my_runs (my_tags (my_read_sexprs str))) 0) in
+  let tagged_tuples_list = collect_all_tagged_sexps sexps_list in
+  let expanded_sexps_list = remove_dups_from_left (expand_list sexps_list) in
+  from_sexp_lst_to_const_tbl tagged_tuples_list expanded_sexps_list;;
+
+let check_fvar_table = fun str ->
+  let asts = my_runs (my_tags (my_read_sexprs str)) in
+  create_free_vars_table asts;;
+
+let random_str_num stam = 
+  let num = (Random.int 999999999) in
+  string_of_int(num);;
+
+let rec main_generate consts fvars depth expr' =
+  match expr' with
+  | Const'(Sexpr(expr)) -> (let str_offset = string_of_int (getOffset_const_table expr consts) in
+                              "mov rax, const_tbl+"^str_offset^"\n")
+  | Seq' (lst) -> (List.fold_left (fun acc curr -> acc ^ "\n" ^ (main_generate consts fvars depth curr) ^ "\n") "" lst)
+  | Var'(VarFree(v)) -> "mov rax, qword [fvar_tbl + 8*"^(string_of_int (getIndex_fvars fvars v))^"]\n"
+  | Set'(Var'(VarFree(s)), e') -> (main_generate consts fvars depth e') ^
+                                   "mov qword [fvar_tbl+8*"^(string_of_int ((getIndex_fvars fvars s)))^"], rax\nmov rax, SOB_VOID_ADDRESS\n"
+  | Var'(VarParam(_, minor)) -> "mov qword rax, [rbp + "^(string_of_int (8*(minor+4)))^"]\n"
+  | Set'(Var'(VarParam(_, minor)), e') ->
+        (main_generate consts fvars depth e') ^ "\nmov qword [rbp + "^(string_of_int (8*(4+minor)))^"], rax\nmov rax, SOB_VOID_ADDRESS\n"
+  | Var'(VarBound(_, major, minor)) ->
+      "mov rax, qword [rbp + 16]\n"^
+      "mov rax, qword [rax + "^(string_of_int (major*8))^"]\n"^
+      "mov rax, qword [rax + "^(string_of_int (minor*8))^"]\n"
+  | Set'(Var'(VarBound(_, major, minor)), e') ->
+        ((main_generate consts fvars depth e') ^
+        "mov rbx, qword [rbp + 8 ∗ 2]\n" ^
         "mov rbx, qword [rbx + 8 ∗"^(string_of_int major)^"]\n"^
         "mov qword [rbx + 8 ∗"^(string_of_int minor)^"], rax\n"^
-        "mov rax, sob_void\n"
-      | Set'(Var'(VarFree(s)), e') -> (mainGenerate e' env)^
-                                      "mov qword [fvar_tbl+"^(string_of_int (8*(getIndex_fvars fvars s)))^"], rax\nmov rax, sob_void\n"
-      |Var'(VarFree(v)) -> "mov rax, qword [fvar_tbl + "^(string_of_int (8*(getIndex_fvars fvars v)))^"]\n"
-      |Seq' (lst) -> List.fold_left (fun acc curr -> acc ^ "\n" ^ (mainGenerate curr env) ^ "\n") "" lst 
-      |Or'(lst) -> let ind = increment_index () in (or_helper lst e ind env)
-      |If' (test, dit, dif) -> 
-        let ind = increment_index () in
-        (if_helper test dit dif env ind)
-      |BoxGet' (v) -> (mainGenerate (Var'(v)) env)  ^ "\n" ^
+        "mov rax, SOB_VOID_ADDRESS\n")
+  | Def'(def_var, def_val) -> (match def_var with
+                               | Var'(VarFree(v)) -> ((main_generate consts fvars depth def_val) ^ (*now rax holds the value of def_val*)
+                                                      "\nmov [fvar_tbl + 8*"^(string_of_int (getIndex_fvars fvars v))^"], rax\nmov rax, SOB_VOID_ADDRESS")
+                               | _ -> ((main_generate consts fvars depth def_var) ^ "\nmov rdi, rax\n" ^
+                                       (main_generate consts fvars depth def_val) ^ "\n mov [rdi], rax\nmov rax, SOB_VOID_ADDRESS"))
+  | Or'(lst) -> (or_helper consts fvars lst (random_str_num 5) depth)
+  | If'(test, dit, dif) -> (if_helper consts fvars test dit dif depth)
+  | BoxGet' (v) -> (main_generate consts fvars env_index (Var'(v)))  ^ "\n" ^
                       "mov rax, qword [rax]\n"
-      |BoxSet' (v, e') -> (mainGenerate e' env) ^ "\n" ^
+  | BoxSet' (v, e') -> (main_generate consts fvars depth e') ^ "\n" ^
                           "push rax\n" ^
-                          (mainGenerate (Var'(v)) env) ^ "\n" ^
+                          (main_generate consts fvars depth (Var'(v))) ^ "\n" ^
                           "pop qword [rax]\n" ^ 
                           "mov rax, sob_void\n"
-      |LambdaSimple'(params, body) -> lambda_helper params body env
-    in mainGenerate e 0;;
+  | LambdaSimple'(params, body) -> ()
+  | _ -> "mov rax, 1";
 
+  and if_helper consts fvars test dit dif depth =
+    let else_label = ".Lelse_" ^ (random_str_num 5) in
+    let exit_label = ".Lexit_" ^ (random_str_num 5) in
+    (main_generate consts fvars depth test) ^ "\n" ^
+    "cmp rax, SOB_FALSE_ADDRESS\n" ^
+    "je " ^ (else_label) ^ "\n" ^
+    (main_generate consts fvars depth dit) ^ "\n" ^
+    "jmp " ^ (exit_label) ^ "\n" ^
+    (else_label) ^ ":\n" ^
+    (main_generate consts fvars depth dif) ^ "\n" ^
+    (exit_label) ^ ":\n";
+  
 
+  and or_helper consts fvars lst str_ind depth =
+    match lst with
+    | [] -> "\n.Lexit_" ^ (str_ind)^ ":\n"
+    | expr :: [] ->  (main_generate consts fvars depth expr) ^ (or_helper consts fvars [] str_ind depth)
+    | expr :: rest -> ((main_generate consts fvars depth expr) ^ "\ncmp rax, SOB_FALSE_ADDRESS\njne .Lexit_" ^ (str_ind)
+                      ^ "\n" ^ (or_helper consts fvars rest str_ind depth));;
+  
+  and top_level_lambda_helper consts fvars body depth =
+    let str_num = (random_str_num)
+    let start_label = ".Lcode_" ^ (str_num) in
+    let end_label = ".Lcont_" ^ (str_num) in
+    let lcode = 
+      label ^ ":\n" ^
+      "push rbp \n mov rbp, rsp \n" ^ 
+      (main_generate consts fvars (depth+1) body) ^ 
+      "leave\nret\n" ^ end_label ^ ":\n" in
+    "MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, " ^ label ^")\n" ^ lcode
+  
+  and nested_lambda_helper consts fvars body depth =
+    let str_num = (random_str_num)
+    let start_label = ".Lcode_" ^ (str_num) in
+    let end_label = ".Lcont_" ^ (str_num) in
+    let ext_env = 
+      "MALLOC rbx, " ^ string_of_int((depth + 1) * 8) ^ (*rbx points to a new allocated space for ext_env*)
+      "mov rdi, 0\n" ^ (*rdi is the parameter copy loop counter*)
+      "mov rsi, [rbp + 8 * 3]" ^
+      "lea rsi, [rsi * 8]" ^
+      "MALLOC rdx, [" ^  
+      "copy_params_loop_" ^ (str_num) ^ ":\n" ^
+      "cmp rdi, [rbp + 8 * 3]\n" ^
+      "je after_params_copy_" ^ (str_num) ^ "\n" ^
+      "mov rsi" 
+      "mov rdx, [rbp + 8 * 2]" ^ "\n" ^(*rcx points to the current env*) 
+      "mov rcx, " ^ (sting_of_int(depth + 1)) ^ "\n" ^ (*rcx is the loop counter*)
+      "ext_env_loop_" ^ (str_num) ^ ":\n"
+      "cmp rcx, 0 \n je ext_env_end_" ^ (str_num) ^
+      "dec qword rcx\n" ^
+      
 
-let make_consts_tbl_2 asts = 
-    let sexps_list = get_all_sexp_multiple_asts (rename_tags_all_asts asts 0) in
-    let tagged_tuples_list = collect_all_tagged_sexps sexps_list in
-    let expanded_sexps_list = remove_dups_from_left (expand_list sexps_list) in
-    from_sexp_lst_to_const_tbl tagged_tuples_list expanded_sexps_list;;
+    
 
 
 module Code_Gen : CODE_GEN = struct
@@ -438,7 +428,8 @@ module Code_Gen : CODE_GEN = struct
     let tagged_tuples_list = collect_all_tagged_sexps sexps_list in
     let expanded_sexps_list = remove_dups_from_left (expand_list sexps_list) in
     from_sexp_lst_to_const_tbl tagged_tuples_list expanded_sexps_list;;
-  let make_fvars_tbl asts = raise X_not_yet_implemented;;
-  let generate consts fvars e = raise X_not_yet_implemented;;
+  let make_fvars_tbl asts = create_free_vars_table asts;;
+  let generate consts fvars e =
+    main_generate consts fvars 0 e
 end;;
 
