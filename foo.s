@@ -20,8 +20,7 @@ MAKE_LITERAL_INT(1)
 MAKE_LITERAL_INT(0)
 MAKE_LITERAL_CHAR(0)
 MAKE_LITERAL_INT(2)
-MAKE_LITERAL_PAIR(const_tbl+52, const_tbl+1)
-MAKE_LITERAL_PAIR(const_tbl+32, const_tbl+61)
+MAKE_LITERAL_INT(9)
 
 ;;; These macro definitions are required for the primitive
 ;;; definitions in the epilogue to work properly
@@ -31,6 +30,7 @@ MAKE_LITERAL_PAIR(const_tbl+32, const_tbl+61)
 %define SOB_TRUE_ADDRESS const_tbl+4
 
 fvar_tbl:
+dq T_UNDEFINED
 dq T_UNDEFINED
 dq T_UNDEFINED
 dq T_UNDEFINED
@@ -153,6 +153,14 @@ main:
     mov [fvar_tbl+8*26], rax
     MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, bin_equ)
     mov [fvar_tbl+8*27], rax
+    MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, car)
+    mov [fvar_tbl+8*28], rax
+    MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, cdr)
+    mov [fvar_tbl+8*29], rax
+    MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, cons_make)
+    mov [fvar_tbl+8*33], rax
+    MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, set_car)
+    mov [fvar_tbl+8*30], rax
 
 user_code_fragment:
 ;;; The code you compiled will be catenated here.
@@ -4032,12 +4040,16 @@ mov rax, SOB_VOID_ADDRESS
 
 push SOB_NIL_ADDRESS		 ; comment nadav
 
-mov rax, const_tbl+78
+mov rax, const_tbl+52
 
 push rax
 
-push 2
-mov rax, qword [fvar_tbl + 8*28]
+mov rax, const_tbl+32
+
+push rax
+
+push 3
+mov rax, qword [fvar_tbl + 8*33]
 
 push qword [rax + 1]			;;(*pushing env on the stack*)
 call [rax + 9]
@@ -4046,6 +4058,36 @@ pop rbx			;;(*popping and saving the argument counter in rbx*)
 shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
 add rsp, rbx			;;(*popping all the arguments*)
 after_applic_831201747:
+
+mov [fvar_tbl + 8*49], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS		 ; comment nadav
+
+mov rax, const_tbl+61
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*49]
+
+push rax
+
+push 3
+mov rax, qword [fvar_tbl + 8*30]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+after_applic_653586493:
+
+	call write_sob_if_not_void
+
+mov rax, qword [fvar_tbl + 8*49]
 
 	call write_sob_if_not_void
 
@@ -4062,6 +4104,29 @@ car:
     leave
     ret
 
+cdr:
+    push rbp
+    mov rbp, rsp
+    mov rsi, PVAR(0)    ; now rsi points to the possible pair
+    mov rax, [rsi + 9]   ; now rax points to the car of the pair
+    leave
+    ret
+cons_make:
+    push rbp
+    mov rbp, rsp
+    mov rsi, PVAR(0)    ; now rsi points to the possible pair
+    mov rdi, PVAR(1)
+    MAKE_PAIR(rax, rsi ,rdi)
+    leave
+    ret
+set_car:
+    push rbp
+    mov rbp, rsp
+    mov rsi, PVAR(0)    ; now rsi points to the possible pair
+    mov rdi, PVAR(1)    ; now rsi points to the possible pair
+    mov qword [rsi+TYPE_SIZE],rdi
+    leave 
+    ret
 is_boolean:
     push rbp
     mov rbp, rsp

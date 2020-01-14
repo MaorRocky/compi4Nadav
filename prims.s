@@ -6,6 +6,29 @@ car:
     leave
     ret
 
+cdr:
+    push rbp
+    mov rbp, rsp
+    mov rsi, PVAR(0)    ; now rsi points to the possible pair
+    mov rax, [rsi + 9]   ; now rax points to the car of the pair
+    leave
+    ret
+cons_make:
+    push rbp
+    mov rbp, rsp
+    mov rsi, PVAR(0)    ; now rsi points to the possible pair
+    mov rdi, PVAR(1)
+    MAKE_PAIR(rax, rsi ,rdi)
+    leave
+    ret
+set_car:
+    push rbp
+    mov rbp, rsp
+    mov rsi, PVAR(0)    ; now rsi points to the possible pair
+    mov rdi, PVAR(1)    ; now rsi points to the possible pair
+    mov qword [rsi+TYPE_SIZE],rdi
+    leave 
+    ret
 is_boolean:
     push rbp
     mov rbp, rsp
