@@ -1,3 +1,11 @@
+car:
+    push rbp
+    mov rbp, rsp
+    mov rsi, PVAR(0)    ; now rsi points to the possible pair
+    mov rax, [rsi + 1]   ; now rax points to the car of the pair
+    leave
+    ret
+
 is_boolean:
     push rbp
     mov rbp, rsp

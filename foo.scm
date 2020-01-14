@@ -1,5 +1,1 @@
-(define x (cond (#f 5)
-                (#f (begin "hello" "world"))
-                (else (cond ((and 1 2 3 "nadav is gay" #f) 7)
-                            (else "Maor the king")))))
-(or #f #f #f x)
+(car '(1 2))
