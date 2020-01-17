@@ -86,6 +86,7 @@ main:
 " ^ (String.concat "\n" (List.map make_primitive_closure primitive_names_to_labels)) ^ "
 
 user_code_fragment:
+
 ;;; The code you compiled will be catenated here.
 ;;; It will be executed immediately after the closures for 
 ;;; the primitive procedures are set up.
