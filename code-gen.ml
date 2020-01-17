@@ -279,14 +279,13 @@ let getIndex_fvars fvars_table fvar_name =
 
 let create_free_vars_table asts =
   let initial_fvars = [("boolean?",0); ("float?",1); ("integer?",2);
-                       ("pair?",3);("null?",4);("char?",5); ("vector?",6); ("string?",7);
-                       ("procedure?",8); ("symbol?",9);  ("string-length",10) ;
-                       ("string-ref",11) ; ( "string-set!",12); ("make-string",13);
-                       ("vector-length",14); ("vector-ref",15); ("vector-set!",16);
-                       ("make-vector",17);("symbol->string",18);("char->integer",19); 
-                       ("integer->char",20);  ("eq?",21);
-                       ("+",22); ("*",23); ("-",24); ("/",25); ("<",26 ); ("=",27);
-                       ("car",28); ("cdr",29);("set-car!",30);("set-cdr!",31); ("apply",32);("cons",33)
+                       ("pair?",3);("null?",4);("char?",5); ("string?",6);
+                       ("procedure?",7); ("symbol?",8);  ("string-length",9) ;
+                       ("string-ref",10) ; ( "string-set!",11); ("make-string",12);
+                       ("symbol->string",13);("char->integer",14); 
+                       ("integer->char",15);  ("eq?",16);
+                       ("+",17); ("*",18); ("-",19); ("/",20); ("<",21); ("=",22);
+                       ("car",23); ("cdr",24); ("cons", 25); ("set-car!",26);("set-cdr!",27); ("apply",28)
                       ] in
   let rec add_fvars_tuples fvars_table fvars_list_to_add = 
     let add_single_tuple fvar_list fvar = 
@@ -349,7 +348,7 @@ let rec main_generate consts fvars depth expr' =
       "mov rax, qword [rax + "^(string_of_int (minor*8))^"]\n"
   | Box'(var) -> (main_generate consts fvars depth (Var'(var))) ^ (*now rax holds the value of var*)
                   "MALLOC r11, 8\n" ^ (*allocating memory for the box pointer in r11*)
-                  "mov qword [r11], rax\n" ^ 
+                  "mov qword [r11], rax\n" ^
                   "mov rax, r11\n" (*now rax points to the location of the value of var*)
   | Set'(Var'(VarBound(_, major, minor)), e') ->
         ((main_generate consts fvars depth e') ^
@@ -374,9 +373,10 @@ let rec main_generate consts fvars depth expr' =
   | LambdaSimple'(params, body) -> (if depth = 0
                                     then (top_level_lambda_helper consts fvars depth body)
                                     else (nested_lambda_helper consts fvars depth body))
+  | LambdaOpt'(params, opt_param, body) -> (top_level_lambda_opt_helper consts fvars depth body (List.length params))
   | Applic'(operator, args) -> (applic_helper consts fvars depth operator args)
   | ApplicTP'(operator, args) -> (applic_helper consts fvars depth operator args)
-  | _ -> "mov rax, 1";
+  | _ -> ";THIS IS A MISTAKE";
 
   and if_helper consts fvars test dit dif depth =
     let else_label = "Lelse_" ^ (random_str_num 5) in
@@ -398,6 +398,145 @@ let rec main_generate consts fvars depth expr' =
     | expr :: rest -> ((main_generate consts fvars depth expr) ^ "\ncmp rax, SOB_FALSE_ADDRESS\njne Lexit_" ^ (str_ind)
                       ^ "\n" ^ (or_helper consts fvars rest str_ind depth));
   
+  and top_level_lambda_opt_helper consts fvars depth body num_of_non_opt_params = 
+    let str_num = (random_str_num 5) in
+    let start_label = "Lcode_" ^ (str_num) in
+    let end_label = "Lcont_" ^ (str_num) in
+    let str_num_non_opt_params = string_of_int(num_of_non_opt_params) in
+    let lcode =
+      "push rbp\n" ^
+      "mov rbp, rsp\n" ^
+      (main_generate consts fvars (depth+1) body) ^
+      "\nleave\n" ^ 
+      "ret\n" ^ 
+      end_label ^ ":\n" in
+    let adjust_stack =
+      "push rbp\n" ^ 
+      "mov rbp, rsp\n" ^
+      "mov rdi, " ^ (str_num_non_opt_params) ^ "\n" ^
+      "mov rsi, qword [rbp + 8*3]\n" ^ (*rsi holds args_count*)
+      "cmp qword rdi, rsi\n" ^
+      "jb vector_size_is_total_num_of_params_" ^ (str_num) ^ "\n" ^
+      "mov rsi, 0\n" ^
+      "mov rsi, " ^ (str_num_non_opt_params) ^ "\n" ^ (*rsi holds the number of non-optional parameters*)
+      "jmp create_vector_" ^ (str_num) ^ "\n" ^
+      "vector_size_is_total_num_of_params_" ^ (str_num) ^ ":\n" ^
+      "mov rsi, [rbp + 8*3]\n" ^
+      "create_vector_" ^ (str_num) ^ ":\n" ^
+      "lea rsi, [rsi*8]\n" ^ (*rsi is the size of the vector used to save all the non-optional parameters*)
+      "mov r9, 0\n" ^
+      "mov rbx, 0\n" ^
+      "mov rdx, 0\n" ^ (*cleaning r9, rdx and rbx*)
+      "MALLOC r9, rsi\n" ^ (*now r9 points to a vector which will store all the non-optional parameters*)
+      "mov rsi, 0\n" ^
+      "mov rsi, " ^ (str_num_non_opt_params) ^ "\n" ^(*rsi holds the number of non-optional parameters*)
+      "mov rcx, 0\n" ^ (*rcx is our loop counter*)
+      "copy_non_opt_params_list_for_opt_" ^ (str_num) ^ ":\n" ^
+      "cmp rcx, rsi\n" ^
+      "je end_copy_non_opt_params_list_for_opt_" ^ (str_num) ^ "\n" ^
+      "mov rbx, qword PVAR(rcx)\n" ^ (*rbx holds the next non-optional parameter  [rbp + 8 * rcx]*)
+      "mov qword [r9 + 8 * rcx], rbx\n" ^ (*saving the parameter in the vector*)
+      "inc rcx\n" ^
+      "jmp copy_non_opt_params_list_for_opt_" ^ (str_num) ^ "\n" ^
+      (*now r9 points to a vector containing all the non-optional parameters*)
+      (*now we need to create a list of the optional parameters*)
+      "end_copy_non_opt_params_list_for_opt_" ^ (str_num) ^ ":\n" ^
+      "mov rsi, [rbp + 8*3]\n" ^ (*rsi holds the general number of parameters*)
+      "cmp rsi, " ^ (str_num_non_opt_params) ^ "\n" ^
+      "je enlarge_stack_" ^ (str_num) ^ "\n" ^
+      "shrink_stack_" ^ (str_num) ^ ":\n" ^ (*we need to save all optional params as list and push that list as one parameter*)
+      "mov rdi, " ^ (str_num_non_opt_params) ^ "\n" ^
+      "dec rsi\n" ^ (*now rsi will be used to point to the last parameter which is the last optional parameter*)
+      (*"dec rsi\n" ^ (*decreasing twice because of magic parameter*)*)
+      "mov r12, 0\n" ^ (*cleaning, r12 will point to the list at the end of the loop*)
+      "mov r11, 0\n" ^ (*cleaning*)
+      "mov r10, 0\n" ^ (*cleaning*)
+      "mov r11, PVAR(rsi)\n" ^ (*[rbp + 8*rsi]*)
+      "dec rsi\n" ^
+      "MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)\n" ^ (*now r12 points to the last pair of the optional parameters list*)
+      "dec rdi\n" ^
+      "create_opt_params_list_" ^ (str_num) ^ ":\n" ^
+      "cmp rdi, rsi\n" ^
+      "je pop_and_adjust_stack_shrink_stack_" ^ (str_num) ^ "\n" ^
+      "mov r11, qword PVAR(rsi)\n" ^
+      "mov r10, r12\n" ^ (*saving the cdr of the next list (which is th current list) in r10*)
+      "MAKE_PAIR(r12, r11, r10)\n" ^ (*r12 points to the new list*)
+      "dec rsi\n" ^
+      "jmp create_opt_params_list_" ^ (str_num) ^ "\n" ^
+      "pop_and_adjust_stack_shrink_stack_" ^ (str_num) ^ ":\n" ^
+      "mov rsi, 0\nmov rdi, 0\nmov rcx,0\nmov rbx, 0\n" ^ (*cleaning registers*)
+      "mov rdi, [rbp + 8]\n" ^ (*rdi contains the return address*)
+      "mov rcx, [rbp + 8*2]\n" ^ (*rcx contains the current env*)
+      "mov rsi, [rbp + 8*3]\n" ^ (*rsi holds the number of parameters*)
+      "add rsp, 32\n" ^ (*poping old rbp, old ret address, curr env and old args count*)
+      "mov rbx, 0\n" ^
+      "lea rbx, [rsi*8]\n" ^ (*rbx holds the size of all the parametres*)
+      "add rsp, rbx\n" ^ (*popping all the parameters*)
+      (*now we need to push the new arguments*)
+      "push qword r12\n" ^ (*pushing the optional argumants as a list*)
+      (*now we need to push all the non-optional arguments*)
+      (*those arguments are saved in a vector pointed by r9*)
+      "mov r12, 0\n" ^ (*cleaning*)
+      "mov r12, " ^ (str_num_non_opt_params) ^ "\n" ^
+      "dec r12\n" ^
+      "mov rbx, 0\n" ^
+      "shrink_push_non_optional_params_loop_" ^ (str_num) ^ ":\n" ^
+      "cmp rbx, r12\n" ^
+      "jb end_shrink_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
+      "push qword [r9 + 8*r12]\n" ^
+      "dec r12\n" ^
+      "jmp shrink_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
+      "end_shrink_push_non_optional_params_loop_" ^ (str_num) ^ ":\n" ^
+      (*now we need to push new args_count which is the number of non_optional + 1 for the optional list*)
+      "mov rsi, 0\n" ^ (*cleaning*)
+      "mov rsi, " ^ (str_num_non_opt_params) ^ "\n" ^
+      "inc rsi\n" ^
+      "push rsi\n" ^ (*pushing the new args_count*)
+      "push rcx\n" ^ (*pushing the env*)
+      "push rdi\n" ^ (*pushing return address*)
+
+      "jmp body_of_opt_" ^ (str_num) ^ "\n" ^
+      (*end of shrink stack*)
+
+
+      (*start of enlarge stack*)
+      "enlarge_stack_" ^ (str_num) ^ ":\n" ^
+      (*r9 already points to a vector containig all the non-optional parameters*)
+      (*we just need to pop the stack and push all the parameters plus the empty list*)
+      "mov rsi, 0\nmov rdi, 0\nmov rcx,0\nmov rbx, 0\nmov rdx, 0\n" ^ (*cleaning registers*)
+      "mov rdx, qword [rbp + 8*3]\n" ^ (*rdx also contains the args_count*)
+      "mov rdi, [rbp + 8]\n" ^ (*rdi contains the return address*)
+      "mov rcx, [rbp + 8*2]\n" ^ (*rcx contains the current env*)
+      "mov rsi, [rbp + 8*3]\n" ^ (*rsi holds the number of parameters*)
+      "add rsp, 32\n" ^ (*poping old rbp, old ret address, curr env and old args count*)
+      "lea rbx, [rsi*8]\n" ^ (*rbx holds the size of all the parametres*)
+      "add rsp, rbx\n" ^ (*popping all the parameters*)
+      "push SOB_NIL_ADDRESS\n" ^ (*pushing the empty list as the last argument*)
+      "mov r10, 0\nmov r11, 0\n" ^ (*cleaning*)
+      "mov r10, rsi\n" ^ (*(str_num_non_opt_params) ^ "\n" ^*)
+      "dec r10\n" ^
+      "mov rbx, 0\n" ^
+      "enlarge_push_non_optional_params_loop_" ^ (str_num) ^ ":\n" ^
+      "cmp rbx, r10\n" ^
+      "jb end_enlarge_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
+      "push qword [r9 + 8*r10]\n" ^
+      "dec r10\n" ^
+      "jmp enlarge_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
+      "end_enlarge_push_non_optional_params_loop_" ^ (str_num) ^ ":\n" ^
+      "mov rsi, rdx\n" ^ (*[rbp + 8*3]*) (*rsi holds arg_count*)
+      "inc rsi\n" ^ (*now rsi holds the new parameter count*)
+      "push rsi\n" ^ (*pushing the argument count*)
+      "push rcx\n" ^ (*pushing the current env*)
+      "push rdi\n" ^ (*pushing the return address*)
+      (*"push rbp\n" ^*)
+      "body_of_opt_" ^ (str_num) ^ ":\n" in
+    "MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, " ^ start_label ^ ")\n" ^
+    "jmp " ^ end_label ^ "\n" ^
+    start_label ^ ":\n" ^
+    adjust_stack ^
+    lcode ^ "\n";
+
+
   and top_level_lambda_helper consts fvars depth body =
     let str_num = (random_str_num 5) in
     let start_label = "Lcode_" ^ (str_num) in
@@ -428,11 +567,11 @@ let rec main_generate consts fvars depth expr' =
       end_label ^ ":\n" in 
     let ext_env =
       "\nmov rsi, [rbp + 8 * 3]\t\t\t;; (*rsi holds the number of parametres on the stack*)\n" ^ 
-      "lea rsi, [rsi * 8]\n" ^ 
-      "inc rsi\t\t\t;;(*rsi holds the number of bytes to allocate for the new vector which is number_of_params + 1 (for magic)*)\n" ^ 
+      (*"inc rsi\t\t\t;;\n" ^*)
+      "lea rsi, [rsi * 8]\n" ^ (*rsi holds the number of bytes to allocate for the new vector which is number_of_params + 1 (for magic)*)
       "MALLOC rdx, rsi\t\t\t;; (*now rdx points to the allocated memory for the new vector*)\n" ^  
-      "mov rcx, [rbp + 8 * 3]\n" ^ 
-      "inc rcx\t\t\t;;(*rcx holds the number of parametres on the stack + 1 (for magic),  rcx is the loop counter*)\n" ^ 
+      "mov rcx, [rbp + 8 * 3]\n" ^ (*rcx holds the number of parameters*)
+      (*"inc rcx\t\t\t;;(*rcx holds the number of parametres on the stack + 1 (for magic),  rcx is the loop counter*)\n" ^ *)
       "mov rdi, 0\t\t\t;;(*rdi will be used to point to the next address in the vector*)\n" ^ 
       "\nmov r9, 4\n" ^
       ";; (*start of loop to copy parameters to the new allocated vector*)\n" ^
@@ -480,19 +619,20 @@ let rec main_generate consts fvars depth expr' =
       | arg :: rest -> (let next_str = str ^ "\n" ^
                                        (main_generate consts fvars depth arg) ^ "\n" ^
                                        "push rax\n" in
-                        args_str rest next_str) 
+                        args_str rest next_str)
       | [] -> str in
-    let push_arguments = args_str (List.rev args) "\npush SOB_NIL_ADDRESS\t\t ; comment nadav\n" in
+    let push_arguments = args_str (List.rev args) "\npush SOB_NIL_ADDRESS\n" in
     let operator_str = main_generate consts fvars depth operator in
     push_arguments ^ "\n" ^
-    "push " ^ string_of_int((List.length args) + 1) ^ "\n" ^
+    "push " ^ string_of_int((List.length args)) ^ "\n" ^ (*adding 1 for magic*)
     operator_str ^ "\n" ^
     "push qword [rax + 1]\t\t\t;;(*pushing env on the stack*)\n" ^ 
     "call [rax + 9]\n" ^
     "add rsp, 8\t\t\t;;(*popping the environment pointer*)\n" ^ 
-    "pop rbx\t\t\t;;(*popping and saving the argument counter in rbx*)\n" ^ 
+    "pop rbx\t\t\t;;(*popping and saving the argument counter in rbx*)\n" ^
     "shl rbx, 3\t\t\t;;(*now rbx holds the sum of sizes of all the arguments to pop*)\n" ^ 
-    "add rsp, rbx\t\t\t;;(*popping all the arguments*)\n" ^ 
+    "add rsp, rbx\t\t\t;;(*popping all the arguments*)\n" ^
+    "add rsp, 8\n" ^ (*popping magic*)
     (*"mov rbx, 0\n" ^ 
     "move rbx, byte [rax]\n" ^ (*saving the type of the sob, that is saved rax, in rbx*)
     "cmp byte rbx, T_CLOSURE" ^ (*making sure that rax does point to a closure sob*)
@@ -504,12 +644,6 @@ let rec main_generate consts fvars depth expr' =
     "after_applic_" ^ (str_num) ^ ":\n";;
 
   
-  
-
-      
-
-    
-
 
 module Code_Gen : CODE_GEN = struct
   let make_consts_tbl asts = 
