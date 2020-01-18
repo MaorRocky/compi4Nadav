@@ -413,8 +413,8 @@ let rec main_generate consts fvars depth expr' =
       "ret\n" ^ 
       end_label ^ ":\n" in
     let ext_env =
-      "\nmov rsi, [rbp + 8 * 3]\t\t\t;; (*rsi holds the number of parametres on the stack*)\n" ^ 
-      (*"inc rsi\t\t\t;;\n" ^*)
+      "\nmov rsi, [rbp + 8 * 3]\t\t\t;; (*rsi holds the number of parametres on the stack*)\n" ^
+      "inc rsi\n" ^ (*incrementing to include magic*)
       "lea rsi, [rsi * 8]\n" ^ (*rsi holds the number of bytes to allocate for the new vector which is number_of_params + 1 (for magic)*)
       "MALLOC rdx, rsi\t\t\t;; (*now rdx points to the allocated memory for the new vector*)\n" ^  
       "mov rcx, [rbp + 8 * 3]\n" ^ (*rcx holds the number of parameters*)
@@ -433,11 +433,12 @@ let rec main_generate consts fvars depth expr' =
       ";; (*now rdx points to the new vector to be added to ext_env*)\n" ^
       ";; (*mov 0 to all neccessary registers*)\n" ^
       "after_params_copy_" ^ (str_num) ^ ":\n" ^
+      "mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS\n" ^
       "mov rcx, 0\nmov rdi, 0\nmov rsi, 0\n" ^
       ";; (*now we need to create ext_env by copying env and adding the new vector*)\n" ^
       "MALLOC rbx, " ^ string_of_int((depth + 1) * 8) ^ "\t\t\t;;(*rbx points to a new allocated space for ext_env*)" ^
-      "\nmov [rbx], rdx\t\t\t;;(*coping the new vector to ext_env[0]*)\n" ^ 
-      "mov rsi, [rbp + 8 * 2]\t\t\t;;(*rsi points to current env*)\n" ^ 
+      "\nmov [rbx], rdx\t\t\t;;(*copying the new vector to ext_env[0]*)\n" ^ 
+      "mov rsi, [rbp + 8 * 2]\t\t\t;;(*rsi points to current env*)\n" ^
       "mov rcx, " ^ string_of_int(depth) ^ "\t\t\t;;(*rcx is the loop counter*)\n" ^ 
       "mov r9, 0\t\t\t;;(*r9 will be used to point to the next vector in current env to be copied*)\n" ^ 
       "mov rdi, 1\t\t\t;;(*rdi will be used to point to the next address in ext_env*)\n" ^ 
@@ -446,7 +447,7 @@ let rec main_generate consts fvars depth expr' =
       "copy_env_loop_" ^ (str_num) ^ ":\n" ^
       "cmp r9, rcx\n" ^
       "je after_env_copy_" ^ (str_num) ^ "\n" ^
-      "mov r8, [rsi + 8 * r9]\t\t\t;;(*r8 points to the next vector int current env to be copied*) \n" ^ 
+      "mov r8, [rsi + 8 * r9]\t\t\t;;(*r8 points to the next vector int current env to be copied*) \n" ^
       "mov [rbx + 8 * rdi], r8\t\t\t;;(*copying the pointer to the vector from env to ext_env*)\n" ^ 
       "inc r9\n" ^
       "inc rdi\n" ^
@@ -750,7 +751,7 @@ let rec main_generate consts fvars depth expr' =
     let str_num = (random_str_num 5) in
     let start_label = "Lcode_" ^ (str_num) in
     let end_label = "Lcont_" ^ (str_num) in
-    let lcode = 
+    let lcode =
       start_label ^ ":\n" ^
       "push rbp\n" ^
       "mov rbp, rsp\n" ^
@@ -760,7 +761,7 @@ let rec main_generate consts fvars depth expr' =
       end_label ^ ":\n" in 
     let ext_env =
       "\nmov rsi, [rbp + 8 * 3]\t\t\t;; (*rsi holds the number of parametres on the stack*)\n" ^ 
-      (*"inc rsi\t\t\t;;\n" ^*)
+      "inc rsi\n" ^ (*incrementing for magic*)
       "lea rsi, [rsi * 8]\n" ^ (*rsi holds the number of bytes to allocate for the new vector which is number_of_params + 1 (for magic)*)
       "MALLOC rdx, rsi\t\t\t;; (*now rdx points to the allocated memory for the new vector*)\n" ^  
       "mov rcx, [rbp + 8 * 3]\n" ^ (*rcx holds the number of parameters*)
@@ -779,6 +780,7 @@ let rec main_generate consts fvars depth expr' =
       ";; (*now rdx points to the new vector to be added to ext_env*)\n" ^
       ";; (*mov 0 to all neccessary registers*)\n" ^
       "after_params_copy_" ^ (str_num) ^ ":\n" ^
+      "mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS\n" ^ (*adding magic to the end of the new vector*)
       "mov rcx, 0\nmov rdi, 0\nmov rsi, 0\n" ^
       ";; (*now we need to create ext_env by copying env and adding the new vector*)\n" ^
       "MALLOC rbx, " ^ string_of_int((depth + 1) * 8) ^ "\t\t\t;;(*rbx points to a new allocated space for ext_env*)" ^
@@ -805,6 +807,37 @@ let rec main_generate consts fvars depth expr' =
     lcode ^ "\n";
   
   
+  and applic_tp_helper consts fvars depth operator args =
+    let rec args_str revresed_args str = (*reversed because the arguments are pushed in reversed order*)
+      match revresed_args with
+      | arg :: rest -> (let next_str = str ^ "\n" ^
+                                       (main_generate consts fvars depth arg) ^ "\n" ^
+                                       "push rax\n" in
+                        args_str rest next_str)
+      | [] -> str in
+    let push_arguments = args_str (List.rev args) "\npush SOB_NIL_ADDRESS\n" in
+    (*let operator_str = main_generate consts fvars depth operator in*)
+    (*"my_stop:\n" ^*)
+    "mov r13, qword [rbp + 8]\n" ^ (*save old return address in r13*)
+    (*now we need to fix the stack*)
+    "mov rsi, [rbp + 8 * 3]\n" ^ (*rsi holds the previous args_count*)
+    "inc rsi\n" ^ (*adding 1 for magic*)
+    "shl rsi, 3\n" ^ (*rsi holds the size of all the arguments on the stack*)
+    "add rsp, 32\n" ^ (*popping old rbp, old ret address, old env and old args_count*)
+    "add rsp, rsi\n" ^ (*popping all the arguments*)
+    "mov rbp, rsp\n" ^
+    push_arguments ^ "\n" ^
+    "push " ^ string_of_int((List.length args)) ^ "\n" ^
+    (main_generate consts fvars depth operator) ^
+    (*now rax points to the closure*)
+    "push qword [rax + 1]\n" ^ (*pushing new env on the stack*)
+    "push r13\n" ^ (*pushing old return address*)
+    "jmp [rax + 9]\n"; (*jumping to function code*)
+
+
+
+  
+  
   and applic_helper consts fvars depth operator args =
     let str_num = (random_str_num 5) in
     let rec args_str revresed_args str = (*reversed because the arguments are pushed in reversed order*)
@@ -815,25 +848,17 @@ let rec main_generate consts fvars depth expr' =
                         args_str rest next_str)
       | [] -> str in
     let push_arguments = args_str (List.rev args) "\npush SOB_NIL_ADDRESS\n" in
-    let operator_str = main_generate consts fvars depth operator in
+    (*let operator_str = main_generate consts fvars depth operator in*)
     push_arguments ^ "\n" ^
-    "push " ^ string_of_int((List.length args)) ^ "\n" ^ (*adding 1 for magic*)
-    operator_str ^ "\n" ^
-    "push qword [rax + 1]\t\t\t;;(*pushing env on the stack*)\n" ^ 
+    "push " ^ string_of_int((List.length args)) ^ "\n" ^
+    (main_generate consts fvars depth operator) ^ "\n" ^
+    "push qword [rax + 1]\t\t\t;;(*pushing env on the stack*)\n" ^
     "call [rax + 9]\n" ^
     "add rsp, 8\t\t\t;;(*popping the environment pointer*)\n" ^ 
     "pop rbx\t\t\t;;(*popping and saving the argument counter in rbx*)\n" ^
     "shl rbx, 3\t\t\t;;(*now rbx holds the sum of sizes of all the arguments to pop*)\n" ^ 
     "add rsp, rbx\t\t\t;;(*popping all the arguments*)\n" ^
     "add rsp, 8\n" ^ (*popping magic*)
-    (*"mov rbx, 0\n" ^ 
-    "move rbx, byte [rax]\n" ^ (*saving the type of the sob, that is saved rax, in rbx*)
-    "cmp byte rbx, T_CLOSURE" ^ (*making sure that rax does point to a closure sob*)
-    "je indeed_closure_" ^ (str_num) ^ "\n" ^
-    "mov rax, 1000\n" ^ (*if it is not a closure the program will just print the number 1000*)
-    "jmp after_applic_" ^ (str_num) ^ "\n" ^
-    "push qword [rax + 1]\n" ^ (*pushing the pointer to the environment*)
-    "call [rax + 9]\n" ^*)
     "after_applic_" ^ (str_num) ^ ":\n";;
 
   
