@@ -14,7 +14,12 @@ MAKE_VOID
 MAKE_NIL
 MAKE_BOOL(0)
 MAKE_BOOL(1)
+MAKE_LITERAL_STRING "whatever",8
+MAKE_LITERAL_SYMBOL(const_tbl+6)
 MAKE_LITERAL_INT(1)
+MAKE_LITERAL_INT(0)
+MAKE_LITERAL_CHAR(0)
+MAKE_LITERAL_INT(2)
 
 ;;; These macro definitions are required for the primitive
 ;;; definitions in the epilogue to work properly
@@ -24,6 +29,21 @@ MAKE_LITERAL_INT(1)
 %define SOB_TRUE_ADDRESS const_tbl+4
 
 fvar_tbl:
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
+dq T_UNDEFINED
 dq T_UNDEFINED
 dq T_UNDEFINED
 dq T_UNDEFINED
@@ -146,15 +166,39 @@ user_code_fragment:
 ;;; It will be executed immediately after the closures for 
 ;;; the primitive procedures are set up.
 
-MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_366831641)
-jmp Lcont_366831641
-Lcode_366831641:
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*28]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*25]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*24]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*23]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*4]
+
+push rax
+
+push 5
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_139310441)
+jmp Lcont_139310441
+Lcode_139310441:
 push rbp
 mov rbp, rsp
 
 push SOB_NIL_ADDRESS
 
-mov qword rax, [rbp + 32]
+mov rax, const_tbl+23
 
 push rax
 
@@ -169,77 +213,137 @@ mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
 
 mov r9, 4
 ;; (*start of loop to copy parameters to the new allocated vector*)
-copy_params_loop_641907500:
+copy_params_loop_530108890:
 cmp rdi, rcx
-je after_params_copy_641907500
+je after_params_copy_530108890
 mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
 mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
 inc rdi
 inc r9
-jmp copy_params_loop_641907500
+jmp copy_params_loop_530108890
 ;; (*now rdx points to the new vector to be added to ext_env*)
 ;; (*mov 0 to all neccessary registers*)
-after_params_copy_641907500:
+after_params_copy_530108890:
 mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
 mov rcx, 0
 mov rdi, 0
 mov rsi, 0
 ;; (*now we need to create ext_env by copying env and adding the new vector*)
 MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
-mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
 mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
 mov rcx, 1			;;(*rcx is the loop counter*)
 mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
 mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
 mov r8, 0
 ;; (*start of loop for copying env[i] to ext_env[i+1]*)
-copy_env_loop_641907500:
+copy_env_loop_530108890:
 cmp r9, rcx
-je after_env_copy_641907500
+je after_env_copy_530108890
 mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
 mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
 inc r9
 inc rdi
-jmp copy_env_loop_641907500
-after_env_copy_641907500:
+jmp copy_env_loop_530108890
+after_env_copy_530108890:
 
-MAKE_CLOSURE(rax, rbx, Lcode_641907500)
-jmp Lcont_641907500
-Lcode_641907500:
+MAKE_CLOSURE(rax, rbx, Lcode_530108890)
+jmp Lcont_530108890
+Lcode_530108890:
+push rbp
+mov rbp, rsp
+
+mov qword rax, [rbp + 32]
+MALLOC r11, 8
+mov qword [r11], rax
+mov rax, r11
+
+mov qword [rbp + 32], rax
+mov rax, SOB_VOID_ADDRESS
+
+
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_479628152:
+cmp rdi, rcx
+je after_params_copy_479628152
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_479628152
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_479628152:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_479628152:
+cmp r9, rcx
+je after_env_copy_479628152
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_479628152
+after_env_copy_479628152:
+
+MAKE_CLOSURE(rax, rbx, Lcode_479628152)
+jmp Lcont_479628152
+Lcode_479628152:
 push rbp
 mov r14, rbp
 mov rbp, rsp
-mov rdi, 0
+mov rdi, 2
 mov rsi, qword [rbp + 8*3]
 cmp qword rdi, rsi
-jb vector_size_is_total_num_of_params_641907500
+jb vector_size_is_total_num_of_params_479628152
 mov rsi, 0
-mov rsi, 0
-jmp create_vector_641907500
-vector_size_is_total_num_of_params_641907500:
+mov rsi, 2
+jmp create_vector_479628152
+vector_size_is_total_num_of_params_479628152:
 mov rsi, [rbp + 8*3]
-create_vector_641907500:
+create_vector_479628152:
 lea rsi, [rsi*8]
 mov r9, 0
 mov rbx, 0
 mov rdx, 0
 MALLOC r9, rsi
 mov rsi, 0
-mov rsi, 0
+mov rsi, 2
 mov rcx, 0
-copy_non_opt_params_list_for_opt_641907500:
+copy_non_opt_params_list_for_opt_479628152:
 cmp rcx, rsi
-je end_copy_non_opt_params_list_for_opt_641907500
+je end_copy_non_opt_params_list_for_opt_479628152
 mov rbx, qword PVAR(rcx)
 mov qword [r9 + 8 * rcx], rbx
 inc rcx
-jmp copy_non_opt_params_list_for_opt_641907500
-end_copy_non_opt_params_list_for_opt_641907500:
+jmp copy_non_opt_params_list_for_opt_479628152
+end_copy_non_opt_params_list_for_opt_479628152:
 mov rsi, [rbp + 8*3]
-cmp rsi, 0
-je enlarge_stack_641907500
-shrink_stack_641907500:
-mov rdi, 0
+cmp rsi, 2
+je enlarge_stack_479628152
+shrink_stack_479628152:
+mov rdi, 2
 dec rsi
 mov r12, 0
 mov r11, 0
@@ -248,15 +352,15 @@ mov r11, PVAR(rsi)
 dec rsi
 MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
 dec rdi
-create_opt_params_list_641907500:
+create_opt_params_list_479628152:
 cmp rdi, rsi
-je pop_and_adjust_stack_shrink_stack_641907500
+je pop_and_adjust_stack_shrink_stack_479628152
 mov r11, qword PVAR(rsi)
 mov r10, r12
 MAKE_PAIR(r12, r11, r10)
 dec rsi
-jmp create_opt_params_list_641907500
-pop_and_adjust_stack_shrink_stack_641907500:
+jmp create_opt_params_list_479628152
+pop_and_adjust_stack_shrink_stack_479628152:
 mov rsi, 0
 mov rdi, 0
 mov rcx,0
@@ -270,30 +374,30 @@ lea rbx, [rsi*8]
 add rsp, rbx
 push qword r12
 mov r12, 0
-mov r12, 0
+mov r12, 2
 dec r12
 mov rbx, 0
-shrink_push_non_optional_params_loop_641907500:
+shrink_push_non_optional_params_loop_479628152:
 cmp rbx, r12
-jbe end_shrink_push_non_optional_params_loop_641907500
+jbe end_shrink_push_non_optional_params_loop_479628152
 push qword [r9 + 8*r12]
 dec r12
-jmp shrink_push_non_optional_params_loop_641907500
-end_shrink_push_non_optional_params_loop_641907500:
+jmp shrink_push_non_optional_params_loop_479628152
+end_shrink_push_non_optional_params_loop_479628152:
 mov r15, 0
 dec r15
 cmp r15, r12
-je dont_push_641907500
+je dont_push_479628152
 push qword [r9 + 8*r12]
-dont_push_641907500:
+dont_push_479628152:
 mov rsi, 0
-mov rsi, 0
+mov rsi, 2
 inc rsi
 push rsi
 push rcx
 push rdi
-jmp body_of_opt_641907500
-enlarge_stack_641907500:
+jmp body_of_opt_479628152
+enlarge_stack_479628152:
 mov rsi, 0
 mov rdi, 0
 mov rcx,0
@@ -312,29 +416,381 @@ mov r11, 0
 mov r10, rsi
 dec r10
 mov rbx, 0
-enlarge_push_non_optional_params_loop_641907500:
+dec rbx
+enlarge_push_non_optional_params_loop_479628152:
 cmp rbx, r10
-jb end_enlarge_push_non_optional_params_loop_641907500
+je end_enlarge_push_non_optional_params_loop_479628152
 push qword [r9 + 8*r10]
 dec r10
-jmp enlarge_push_non_optional_params_loop_641907500
-end_enlarge_push_non_optional_params_loop_641907500:
+jmp enlarge_push_non_optional_params_loop_479628152
+end_enlarge_push_non_optional_params_loop_479628152:
 mov rsi, rdx
 inc rsi
 push rsi
 push rcx
 push rdi
-body_of_opt_641907500:
+body_of_opt_479628152:
 mov rbp, r14
 push rbp
 mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_541080542:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_744807207
+mov rax, const_tbl+1
+
+jmp Lexit_847232054
+Lelse_744807207:
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 48]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_380528153:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_308140838
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_575223720:
+
+push rax
+
 mov qword rax, [rbp + 32]
-my_stop:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_435807891:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_283791396:
+
+push rax
+
+push 1
+mov qword rax, [rbp + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_977879997:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_463926866:
+
+jmp Lexit_304507802
+Lelse_308140838:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 48]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_510529514:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_15076718:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*29]
+
+push rax
+
+push 4
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_483666380:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 48]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_599609540:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_942578091:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 3
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_663533580:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_198288938:
+
+Lexit_304507802:
+
+Lexit_847232054:
 mov rbx, [rsp + 8]
 
 leave
 ret
-Lcont_641907500:
+Lcont_479628152:
+
+
+push rax
+mov qword rax, [rbp + 32]
+
+pop qword [rax]
+mov rax, SOB_VOID_ADDRESS
+
+
+mov qword rax, [rbp + 32]
+
+mov rax, qword [rax]
+
+
+
+leave
+ret
+Lcont_530108890:
 
 
 push qword [rax + 1]			;;(*pushing env on the stack*)
@@ -344,26 +800,1338 @@ pop rbx			;;(*popping and saving the argument counter in rbx*)
 shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
 add rsp, rbx			;;(*popping all the arguments*)
 add rsp, 8
-after_applic_332180439:
+after_applic_743829425:
 
 leave
 ret
-Lcont_366831641:
+Lcont_139310441:
 
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_858766356:
 
 mov [fvar_tbl + 8*29], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_269997124)
+jmp Lcont_269997124
+Lcode_269997124:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 48]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*23]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_793128188:
+
+push rax
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 2
+mov qword rax, [rbp + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_868569136:
+
+push rax
+
+push 1
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_844370963:
+cmp rdi, rcx
+je after_params_copy_844370963
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_844370963
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_844370963:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_844370963:
+cmp r9, rcx
+je after_env_copy_844370963
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_844370963
+after_env_copy_844370963:
+
+MAKE_CLOSURE(rax, rbx, Lcode_844370963)
+jmp Lcont_844370963
+Lcode_844370963:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+1
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 16]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_525340320:
+
+push rax
+
+push 2
+mov rax, qword [fvar_tbl + 8*16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_231413264:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_771724904
+mov qword rax, [rbp + 32]
+
+jmp Lexit_367008404
+Lelse_771724904:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 16]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_661312616:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push rax
+
+push 3
+mov rax, qword [fvar_tbl + 8*30]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_634982515:
+
+Lexit_367008404:
+
+leave
+ret
+Lcont_844370963:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_407118687:
+
+leave
+ret
+Lcont_269997124:
+
+
+mov [fvar_tbl + 8*30], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_882359236)
+jmp Lcont_882359236
+Lcode_882359236:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+23
+
+push rax
+
+mov rax, const_tbl+23
+
+push rax
+
+push 2
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_911393886:
+cmp rdi, rcx
+je after_params_copy_911393886
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_911393886
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_911393886:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_911393886:
+cmp r9, rcx
+je after_env_copy_911393886
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_911393886
+after_env_copy_911393886:
+
+MAKE_CLOSURE(rax, rbx, Lcode_911393886)
+jmp Lcont_911393886
+Lcode_911393886:
+push rbp
+mov rbp, rsp
+
+mov qword rax, [rbp + 40]
+MALLOC r11, 8
+mov qword [r11], rax
+mov rax, r11
+
+mov qword [rbp + 40], rax
+mov rax, SOB_VOID_ADDRESS
+
+
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 16]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_222584391:
+
+mov qword [rbp + 32], rax
+mov rax, SOB_VOID_ADDRESS
+
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_157380188:
+cmp rdi, rcx
+je after_params_copy_157380188
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_157380188
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_157380188:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_157380188:
+cmp r9, rcx
+je after_env_copy_157380188
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_157380188
+after_env_copy_157380188:
+
+MAKE_CLOSURE(rax, rbx, Lcode_157380188)
+jmp Lcont_157380188
+Lcode_157380188:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 48]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*23]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_355434846:
+
+push rax
+
+push 2
+mov qword rax, [rbp + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_583061130:
+
+push rax
+
+push 1
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_551702454:
+cmp rdi, rcx
+je after_params_copy_551702454
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_551702454
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_551702454:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 32			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 3			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_551702454:
+cmp r9, rcx
+je after_env_copy_551702454
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_551702454
+after_env_copy_551702454:
+
+MAKE_CLOSURE(rax, rbx, Lcode_551702454)
+jmp Lcont_551702454
+Lcode_551702454:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+1
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 16]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_395313404:
+
+push rax
+
+push 2
+mov rax, qword [fvar_tbl + 8*16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_905522432:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_675348438
+mov qword rax, [rbp + 32]
+
+jmp Lexit_67564655
+Lelse_675348438:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 16]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_837406327:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push rax
+
+push 3
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_259038460:
+
+Lexit_67564655:
+
+leave
+ret
+Lcont_551702454:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_904360012:
+
+leave
+ret
+Lcont_157380188:
+
+
+push rax
+mov qword rax, [rbp + 40]
+
+pop qword [rax]
+mov rax, SOB_VOID_ADDRESS
+
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push rax
+
+push 3
+mov qword rax, [rbp + 40]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_640034938:
+
+
+
+leave
+ret
+Lcont_911393886:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_644830334:
+
+leave
+ret
+Lcont_882359236:
+
+
+mov [fvar_tbl + 8*31], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_326105067)
+jmp Lcont_326105067
+Lcode_326105067:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 0
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_326105067
+mov rsi, 0
+mov rsi, 0
+jmp create_vector_326105067
+vector_size_is_total_num_of_params_326105067:
+mov rsi, [rbp + 8*3]
+create_vector_326105067:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 0
+mov rcx, 0
+copy_non_opt_params_list_for_opt_326105067:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_326105067
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_326105067
+end_copy_non_opt_params_list_for_opt_326105067:
+mov rsi, [rbp + 8*3]
+cmp rsi, 0
+je enlarge_stack_326105067
+shrink_stack_326105067:
+mov rdi, 0
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_326105067:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_326105067
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_326105067
+pop_and_adjust_stack_shrink_stack_326105067:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 0
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_326105067:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_326105067
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_326105067
+end_shrink_push_non_optional_params_loop_326105067:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_326105067
+push qword [r9 + 8*r12]
+dont_push_326105067:
+mov rsi, 0
+mov rsi, 0
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_326105067
+enlarge_stack_326105067:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_326105067:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_326105067
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_326105067
+end_enlarge_push_non_optional_params_loop_326105067:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_326105067:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+1
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [fvar_tbl + 8*16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_408226969:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_409307569
+mov qword rax, [rbp + 32]
+
+jmp Lexit_681013979
+Lelse_409307569:
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+32
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*34]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_115132095:
+
+push rax
+
+push 2
+mov rax, qword [fvar_tbl + 8*22]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_246489982:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_937227572
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*23]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_98100301:
+
+jmp Lexit_274455462
+Lelse_937227572:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_566618411:
+
+push rax
+
+push 1
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_832502760:
+cmp rdi, rcx
+je after_params_copy_832502760
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_832502760
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_832502760:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_832502760:
+cmp r9, rcx
+je after_env_copy_832502760
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_832502760
+after_env_copy_832502760:
+
+MAKE_CLOSURE(rax, rbx, Lcode_832502760)
+jmp Lcont_832502760
+Lcode_832502760:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_565297347:
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_285021971:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*23]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_44907061:
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*25]
+
+push rax
+
+push 3
+mov rax, qword [fvar_tbl + 8*31]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_6123927:
+
+leave
+ret
+Lcont_832502760:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_672812566:
+
+Lexit_274455462:
+
+Lexit_681013979:
+
+leave
+ret
+Lcont_326105067:
+
+
+mov [fvar_tbl + 8*33], rax
 mov rax, SOB_VOID_ADDRESS
 	call write_sob_if_not_void
 
 
 push SOB_NIL_ADDRESS
 
-mov rax, const_tbl+6
+mov rax, qword [fvar_tbl + 8*25]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*31]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*4]
+
+push rax
+
+push 3
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_301578941)
+jmp Lcont_301578941
+Lcode_301578941:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_658392294:
+cmp rdi, rcx
+je after_params_copy_658392294
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_658392294
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_658392294:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_658392294:
+cmp r9, rcx
+je after_env_copy_658392294
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_658392294
+after_env_copy_658392294:
+
+MAKE_CLOSURE(rax, rbx, Lcode_658392294)
+jmp Lcont_658392294
+Lcode_658392294:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 0
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_658392294
+mov rsi, 0
+mov rsi, 0
+jmp create_vector_658392294
+vector_size_is_total_num_of_params_658392294:
+mov rsi, [rbp + 8*3]
+create_vector_658392294:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 0
+mov rcx, 0
+copy_non_opt_params_list_for_opt_658392294:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_658392294
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_658392294
+end_copy_non_opt_params_list_for_opt_658392294:
+mov rsi, [rbp + 8*3]
+cmp rsi, 0
+je enlarge_stack_658392294
+shrink_stack_658392294:
+mov rdi, 0
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_658392294:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_658392294
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_658392294
+pop_and_adjust_stack_shrink_stack_658392294:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 0
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_658392294:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_658392294
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_658392294
+end_shrink_push_non_optional_params_loop_658392294:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_658392294
+push qword [r9 + 8*r12]
+dont_push_658392294:
+mov rsi, 0
+mov rsi, 0
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_658392294
+enlarge_stack_658392294:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_658392294:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_658392294
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_658392294
+end_enlarge_push_non_optional_params_loop_658392294:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_658392294:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, const_tbl+1
+
+push rax
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_808498156:
+cmp rdi, rcx
+je after_params_copy_808498156
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_808498156
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_808498156:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_808498156:
+cmp r9, rcx
+je after_env_copy_808498156
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_808498156
+after_env_copy_808498156:
+
+MAKE_CLOSURE(rax, rbx, Lcode_808498156)
+jmp Lcont_808498156
+Lcode_808498156:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
 
 push rax
 
 push 1
-mov rax, qword [fvar_tbl + 8*29]
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
 
 push qword [rax + 1]			;;(*pushing env on the stack*)
 call [rax + 9]
@@ -372,7 +2140,5458 @@ pop rbx			;;(*popping and saving the argument counter in rbx*)
 shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
 add rsp, rbx			;;(*popping all the arguments*)
 add rsp, 8
-after_applic_781944104:
+after_applic_142687140:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_866852534
+mov qword rax, [rbp + 32]
+
+jmp Lexit_735962992
+Lelse_866852534:
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push rax
+
+push 3
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_478170254:
+
+Lexit_735962992:
+
+leave
+ret
+Lcont_808498156:
+
+
+push rax
+
+push 3
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_732603925:
+mov rbx, [rsp + 8]
+
+leave
+ret
+Lcont_658392294:
+
+
+leave
+ret
+Lcont_301578941:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_513666613:
+
+mov [fvar_tbl + 8*35], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_337561787)
+jmp Lcont_337561787
+Lcode_337561787:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 0
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_337561787
+mov rsi, 0
+mov rsi, 0
+jmp create_vector_337561787
+vector_size_is_total_num_of_params_337561787:
+mov rsi, [rbp + 8*3]
+create_vector_337561787:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 0
+mov rcx, 0
+copy_non_opt_params_list_for_opt_337561787:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_337561787
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_337561787
+end_copy_non_opt_params_list_for_opt_337561787:
+mov rsi, [rbp + 8*3]
+cmp rsi, 0
+je enlarge_stack_337561787
+shrink_stack_337561787:
+mov rdi, 0
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_337561787:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_337561787
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_337561787
+pop_and_adjust_stack_shrink_stack_337561787:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 0
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_337561787:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_337561787
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_337561787
+end_shrink_push_non_optional_params_loop_337561787:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_337561787
+push qword [r9 + 8*r12]
+dont_push_337561787:
+mov rsi, 0
+mov rsi, 0
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_337561787
+enlarge_stack_337561787:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_337561787:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_337561787
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_337561787
+end_enlarge_push_non_optional_params_loop_337561787:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_337561787:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+mov qword rax, [rbp + 32]
+
+leave
+ret
+Lcont_337561787:
+
+
+mov [fvar_tbl + 8*36], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*24]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*3]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*4]
+
+push rax
+
+push 3
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_170783178)
+jmp Lcont_170783178
+Lcode_170783178:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+23
+
+push rax
+
+push 1
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_323318772:
+cmp rdi, rcx
+je after_params_copy_323318772
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_323318772
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_323318772:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_323318772:
+cmp r9, rcx
+je after_env_copy_323318772
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_323318772
+after_env_copy_323318772:
+
+MAKE_CLOSURE(rax, rbx, Lcode_323318772)
+jmp Lcont_323318772
+Lcode_323318772:
+push rbp
+mov rbp, rsp
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_359421285:
+cmp rdi, rcx
+je after_params_copy_359421285
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_359421285
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_359421285:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_359421285:
+cmp r9, rcx
+je after_env_copy_359421285
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_359421285
+after_env_copy_359421285:
+
+MAKE_CLOSURE(rax, rbx, Lcode_359421285)
+jmp Lcont_359421285
+Lcode_359421285:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_798031681:
+
+cmp rax, SOB_FALSE_ADDRESS
+jne Lexit_96734197
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_260383377:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_107290671
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_909437959:
+
+push rax
+
+push 1
+mov rax, qword [fvar_tbl + 8*37]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_230494162:
+
+jmp Lexit_661528186
+Lelse_107290671:
+mov rax, const_tbl+2
+
+Lexit_661528186:
+
+Lexit_96734197:
+
+leave
+ret
+Lcont_359421285:
+
+
+mov qword [rbp + 32], rax
+mov rax, SOB_VOID_ADDRESS
+
+
+mov qword rax, [rbp + 32]
+
+
+leave
+ret
+Lcont_323318772:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_700349737:
+
+leave
+ret
+Lcont_170783178:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_196223014:
+
+mov [fvar_tbl + 8*37], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*17]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*30]
+
+push rax
+
+push 2
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_888483189)
+jmp Lcont_888483189
+Lcode_888483189:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_929852288:
+cmp rdi, rcx
+je after_params_copy_929852288
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_929852288
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_929852288:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_929852288:
+cmp r9, rcx
+je after_env_copy_929852288
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_929852288
+after_env_copy_929852288:
+
+MAKE_CLOSURE(rax, rbx, Lcode_929852288)
+jmp Lcont_929852288
+Lcode_929852288:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, const_tbl+41
+
+push rax
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_267491446:
+cmp rdi, rcx
+je after_params_copy_267491446
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_267491446
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_267491446:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_267491446:
+cmp r9, rcx
+je after_env_copy_267491446
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_267491446
+after_env_copy_267491446:
+
+MAKE_CLOSURE(rax, rbx, Lcode_267491446)
+jmp Lcont_267491446
+Lcode_267491446:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+32
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_255480485:
+
+leave
+ret
+Lcont_267491446:
+
+
+push rax
+
+push 3
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_402949384:
+
+leave
+ret
+Lcont_929852288:
+
+
+leave
+ret
+Lcont_888483189:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_284101271:
+
+mov [fvar_tbl + 8*34], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*12]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*23]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*4]
+
+push rax
+
+push 3
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_698193242)
+jmp Lcont_698193242
+Lcode_698193242:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_763661805:
+cmp rdi, rcx
+je after_params_copy_763661805
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_763661805
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_763661805:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_763661805:
+cmp r9, rcx
+je after_env_copy_763661805
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_763661805
+after_env_copy_763661805:
+
+MAKE_CLOSURE(rax, rbx, Lcode_763661805)
+jmp Lcont_763661805
+Lcode_763661805:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 1
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_763661805
+mov rsi, 0
+mov rsi, 1
+jmp create_vector_763661805
+vector_size_is_total_num_of_params_763661805:
+mov rsi, [rbp + 8*3]
+create_vector_763661805:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 1
+mov rcx, 0
+copy_non_opt_params_list_for_opt_763661805:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_763661805
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_763661805
+end_copy_non_opt_params_list_for_opt_763661805:
+mov rsi, [rbp + 8*3]
+cmp rsi, 1
+je enlarge_stack_763661805
+shrink_stack_763661805:
+mov rdi, 1
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_763661805:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_763661805
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_763661805
+pop_and_adjust_stack_shrink_stack_763661805:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 1
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_763661805:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_763661805
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_763661805
+end_shrink_push_non_optional_params_loop_763661805:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_763661805
+push qword [r9 + 8*r12]
+dont_push_763661805:
+mov rsi, 0
+mov rsi, 1
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_763661805
+enlarge_stack_763661805:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_763661805:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_763661805
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_763661805
+end_enlarge_push_non_optional_params_loop_763661805:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_763661805:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_57534567:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_976927359
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+50
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_698633168:
+
+jmp Lexit_725956947
+Lelse_976927359:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_572162651:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_991642384:
+
+Lexit_725956947:
+mov rbx, [rsp + 8]
+
+leave
+ret
+Lcont_763661805:
+
+
+leave
+ret
+Lcont_698193242:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_77108180:
+
+mov [fvar_tbl + 8*12], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_44463351)
+jmp Lcont_44463351
+Lcode_44463351:
+push rbp
+mov rbp, rsp
+mov qword rax, [rbp + 32]
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_468792198
+mov rax, const_tbl+2
+
+jmp Lexit_746869368
+Lelse_468792198:
+mov rax, const_tbl+4
+
+Lexit_746869368:
+
+leave
+ret
+Lcont_44463351:
+
+
+mov [fvar_tbl + 8*38], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*2]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*1]
+
+push rax
+
+push 2
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_34268921)
+jmp Lcont_34268921
+Lcode_34268921:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_974805207:
+cmp rdi, rcx
+je after_params_copy_974805207
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_974805207
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_974805207:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_974805207:
+cmp r9, rcx
+je after_env_copy_974805207
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_974805207
+after_env_copy_974805207:
+
+MAKE_CLOSURE(rax, rbx, Lcode_974805207)
+jmp Lcont_974805207
+Lcode_974805207:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_929236965:
+
+cmp rax, SOB_FALSE_ADDRESS
+jne Lexit_996131318
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_926039712:
+
+Lexit_996131318:
+
+leave
+ret
+Lcont_974805207:
+
+
+leave
+ret
+Lcont_34268921:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_877236981:
+
+mov [fvar_tbl + 8*39], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*17]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*30]
+
+push rax
+
+push 2
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_946550165)
+jmp Lcont_946550165
+Lcode_946550165:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_795791525:
+cmp rdi, rcx
+je after_params_copy_795791525
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_795791525
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_795791525:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_795791525:
+cmp r9, rcx
+je after_env_copy_795791525
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_795791525
+after_env_copy_795791525:
+
+MAKE_CLOSURE(rax, rbx, Lcode_795791525)
+jmp Lcont_795791525
+Lcode_795791525:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 0
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_795791525
+mov rsi, 0
+mov rsi, 0
+jmp create_vector_795791525
+vector_size_is_total_num_of_params_795791525:
+mov rsi, [rbp + 8*3]
+create_vector_795791525:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 0
+mov rcx, 0
+copy_non_opt_params_list_for_opt_795791525:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_795791525
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_795791525
+end_copy_non_opt_params_list_for_opt_795791525:
+mov rsi, [rbp + 8*3]
+cmp rsi, 0
+je enlarge_stack_795791525
+shrink_stack_795791525:
+mov rdi, 0
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_795791525:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_795791525
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_795791525
+pop_and_adjust_stack_shrink_stack_795791525:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 0
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_795791525:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_795791525
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_795791525
+end_shrink_push_non_optional_params_loop_795791525:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_795791525
+push qword [r9 + 8*r12]
+dont_push_795791525:
+mov rsi, 0
+mov rsi, 0
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_795791525
+enlarge_stack_795791525:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_795791525:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_795791525
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_795791525
+end_enlarge_push_non_optional_params_loop_795791525:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_795791525:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, const_tbl+41
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push rax
+
+push 3
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_954345019:
+mov rbx, [rsp + 8]
+
+leave
+ret
+Lcont_795791525:
+
+
+leave
+ret
+Lcont_946550165:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_113414598:
+
+mov [fvar_tbl + 8*17], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*18]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*30]
+
+push rax
+
+push 2
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_399233363)
+jmp Lcont_399233363
+Lcode_399233363:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_222968330:
+cmp rdi, rcx
+je after_params_copy_222968330
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_222968330
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_222968330:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_222968330:
+cmp r9, rcx
+je after_env_copy_222968330
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_222968330
+after_env_copy_222968330:
+
+MAKE_CLOSURE(rax, rbx, Lcode_222968330)
+jmp Lcont_222968330
+Lcode_222968330:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 0
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_222968330
+mov rsi, 0
+mov rsi, 0
+jmp create_vector_222968330
+vector_size_is_total_num_of_params_222968330:
+mov rsi, [rbp + 8*3]
+create_vector_222968330:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 0
+mov rcx, 0
+copy_non_opt_params_list_for_opt_222968330:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_222968330
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_222968330
+end_copy_non_opt_params_list_for_opt_222968330:
+mov rsi, [rbp + 8*3]
+cmp rsi, 0
+je enlarge_stack_222968330
+shrink_stack_222968330:
+mov rdi, 0
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_222968330:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_222968330
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_222968330
+pop_and_adjust_stack_shrink_stack_222968330:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 0
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_222968330:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_222968330
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_222968330
+end_shrink_push_non_optional_params_loop_222968330:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_222968330
+push qword [r9 + 8*r12]
+dont_push_222968330:
+mov rsi, 0
+mov rsi, 0
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_222968330
+enlarge_stack_222968330:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_222968330:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_222968330
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_222968330
+end_enlarge_push_non_optional_params_loop_222968330:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_222968330:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, const_tbl+32
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push rax
+
+push 3
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_369777082:
+mov rbx, [rsp + 8]
+
+leave
+ret
+Lcont_222968330:
+
+
+leave
+ret
+Lcont_399233363:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_358483680:
+
+mov [fvar_tbl + 8*18], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*4]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*17]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*19]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*28]
+
+push rax
+
+push 4
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_925883755)
+jmp Lcont_925883755
+Lcode_925883755:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_988084389:
+cmp rdi, rcx
+je after_params_copy_988084389
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_988084389
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_988084389:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_988084389:
+cmp r9, rcx
+je after_env_copy_988084389
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_988084389
+after_env_copy_988084389:
+
+MAKE_CLOSURE(rax, rbx, Lcode_988084389)
+jmp Lcont_988084389
+Lcode_988084389:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 1
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_988084389
+mov rsi, 0
+mov rsi, 1
+jmp create_vector_988084389
+vector_size_is_total_num_of_params_988084389:
+mov rsi, [rbp + 8*3]
+create_vector_988084389:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 1
+mov rcx, 0
+copy_non_opt_params_list_for_opt_988084389:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_988084389
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_988084389
+end_copy_non_opt_params_list_for_opt_988084389:
+mov rsi, [rbp + 8*3]
+cmp rsi, 1
+je enlarge_stack_988084389
+shrink_stack_988084389:
+mov rdi, 1
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_988084389:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_988084389
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_988084389
+pop_and_adjust_stack_shrink_stack_988084389:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 1
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_988084389:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_988084389
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_988084389
+end_shrink_push_non_optional_params_loop_988084389:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_988084389
+push qword [r9 + 8*r12]
+dont_push_988084389:
+mov rsi, 0
+mov rsi, 1
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_988084389
+enlarge_stack_988084389:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_988084389:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_988084389
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_988084389
+end_enlarge_push_non_optional_params_loop_988084389:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_988084389:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_114123571:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_885606344
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, const_tbl+41
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_45872671:
+
+jmp Lexit_491303945
+Lelse_885606344:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 16]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_469797467:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_425882962:
+
+Lexit_491303945:
+mov rbx, [rsp + 8]
+
+leave
+ret
+Lcont_988084389:
+
+
+leave
+ret
+Lcont_925883755:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_704528317:
+
+mov [fvar_tbl + 8*19], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*4]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*18]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*20]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*28]
+
+push rax
+
+push 4
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_325241101)
+jmp Lcont_325241101
+Lcode_325241101:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_380853348:
+cmp rdi, rcx
+je after_params_copy_380853348
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_380853348
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_380853348:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_380853348:
+cmp r9, rcx
+je after_env_copy_380853348
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_380853348
+after_env_copy_380853348:
+
+MAKE_CLOSURE(rax, rbx, Lcode_380853348)
+jmp Lcont_380853348
+Lcode_380853348:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 1
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_380853348
+mov rsi, 0
+mov rsi, 1
+jmp create_vector_380853348
+vector_size_is_total_num_of_params_380853348:
+mov rsi, [rbp + 8*3]
+create_vector_380853348:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 1
+mov rcx, 0
+copy_non_opt_params_list_for_opt_380853348:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_380853348
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_380853348
+end_copy_non_opt_params_list_for_opt_380853348:
+mov rsi, [rbp + 8*3]
+cmp rsi, 1
+je enlarge_stack_380853348
+shrink_stack_380853348:
+mov rdi, 1
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_380853348:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_380853348
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_380853348
+pop_and_adjust_stack_shrink_stack_380853348:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 1
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_380853348:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_380853348
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_380853348
+end_shrink_push_non_optional_params_loop_380853348:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_380853348
+push qword [r9 + 8*r12]
+dont_push_380853348:
+mov rsi, 0
+mov rsi, 1
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_380853348
+enlarge_stack_380853348:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_380853348:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_380853348
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_380853348
+end_enlarge_push_non_optional_params_loop_380853348:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_380853348:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_810501363:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_403884646
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, const_tbl+32
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_264763085:
+
+jmp Lexit_565526397
+Lelse_403884646:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 16]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_465023326:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_854160036:
+
+Lexit_565526397:
+mov rbx, [rsp + 8]
+
+leave
+ret
+Lcont_380853348:
+
+
+leave
+ret
+Lcont_325241101:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_742945834:
+
+mov [fvar_tbl + 8*20], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*28]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*24]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*23]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*4]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*22]
+
+push rax
+
+push 5
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_650329590)
+jmp Lcont_650329590
+Lcode_650329590:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+23
+
+push rax
+
+push 1
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_802660656:
+cmp rdi, rcx
+je after_params_copy_802660656
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_802660656
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_802660656:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_802660656:
+cmp r9, rcx
+je after_env_copy_802660656
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_802660656
+after_env_copy_802660656:
+
+MAKE_CLOSURE(rax, rbx, Lcode_802660656)
+jmp Lcont_802660656
+Lcode_802660656:
+push rbp
+mov rbp, rsp
+
+mov qword rax, [rbp + 32]
+MALLOC r11, 8
+mov qword [r11], rax
+mov rax, r11
+
+mov qword [rbp + 32], rax
+mov rax, SOB_VOID_ADDRESS
+
+
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_124999081:
+cmp rdi, rcx
+je after_params_copy_124999081
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_124999081
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_124999081:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_124999081:
+cmp r9, rcx
+je after_env_copy_124999081
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_124999081
+after_env_copy_124999081:
+
+MAKE_CLOSURE(rax, rbx, Lcode_124999081)
+jmp Lcont_124999081
+Lcode_124999081:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 1
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_124999081
+mov rsi, 0
+mov rsi, 1
+jmp create_vector_124999081
+vector_size_is_total_num_of_params_124999081:
+mov rsi, [rbp + 8*3]
+create_vector_124999081:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 1
+mov rcx, 0
+copy_non_opt_params_list_for_opt_124999081:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_124999081
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_124999081
+end_copy_non_opt_params_list_for_opt_124999081:
+mov rsi, [rbp + 8*3]
+cmp rsi, 1
+je enlarge_stack_124999081
+shrink_stack_124999081:
+mov rdi, 1
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_124999081:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_124999081
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_124999081
+pop_and_adjust_stack_shrink_stack_124999081:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 1
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_124999081:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_124999081
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_124999081
+end_shrink_push_non_optional_params_loop_124999081:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_124999081
+push qword [r9 + 8*r12]
+dont_push_124999081:
+mov rsi, 0
+mov rsi, 1
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_124999081
+enlarge_stack_124999081:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_124999081:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_124999081
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_124999081
+end_enlarge_push_non_optional_params_loop_124999081:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_124999081:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_905984946:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_148094636
+mov rax, const_tbl+4
+
+jmp Lexit_613964162
+Lelse_148094636:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_578098865:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_607713823:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_47888016
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_361404286:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push rax
+
+push 3
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_986630149:
+
+jmp Lexit_23684769
+Lelse_47888016:
+mov rax, const_tbl+2
+
+Lexit_23684769:
+
+Lexit_613964162:
+mov rbx, [rsp + 8]
+
+leave
+ret
+Lcont_124999081:
+
+
+push rax
+mov qword rax, [rbp + 32]
+
+pop qword [rax]
+mov rax, SOB_VOID_ADDRESS
+
+
+mov qword rax, [rbp + 32]
+
+mov rax, qword [rax]
+
+
+
+leave
+ret
+Lcont_802660656:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_139596420:
+
+leave
+ret
+Lcont_650329590:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_182772876:
+
+mov [fvar_tbl + 8*22], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*24]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*23]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*21]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*4]
+
+push rax
+
+push 4
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_116195277)
+jmp Lcont_116195277
+Lcode_116195277:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+23
+
+push rax
+
+push 1
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_514260817:
+cmp rdi, rcx
+je after_params_copy_514260817
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_514260817
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_514260817:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_514260817:
+cmp r9, rcx
+je after_env_copy_514260817
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_514260817
+after_env_copy_514260817:
+
+MAKE_CLOSURE(rax, rbx, Lcode_514260817)
+jmp Lcont_514260817
+Lcode_514260817:
+push rbp
+mov rbp, rsp
+
+mov qword rax, [rbp + 32]
+MALLOC r11, 8
+mov qword [r11], rax
+mov rax, r11
+
+mov qword [rbp + 32], rax
+mov rax, SOB_VOID_ADDRESS
+
+
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_514664874:
+cmp rdi, rcx
+je after_params_copy_514664874
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_514664874
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_514664874:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_514664874:
+cmp r9, rcx
+je after_env_copy_514664874
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_514664874
+after_env_copy_514664874:
+
+MAKE_CLOSURE(rax, rbx, Lcode_514664874)
+jmp Lcont_514664874
+Lcode_514664874:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_691104538:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_736646258
+mov rax, const_tbl+4
+
+jmp Lexit_991360546
+Lelse_736646258:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_337831655:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_967574633:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_777214754
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_256182561:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_421021563:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_303242831:
+
+jmp Lexit_226304471
+Lelse_777214754:
+mov rax, const_tbl+2
+
+Lexit_226304471:
+
+Lexit_991360546:
+
+leave
+ret
+Lcont_514664874:
+
+
+push rax
+mov qword rax, [rbp + 32]
+
+pop qword [rax]
+mov rax, SOB_VOID_ADDRESS
+
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_541256566:
+cmp rdi, rcx
+je after_params_copy_541256566
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_541256566
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_541256566:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_541256566:
+cmp r9, rcx
+je after_env_copy_541256566
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_541256566
+after_env_copy_541256566:
+
+MAKE_CLOSURE(rax, rbx, Lcode_541256566)
+jmp Lcont_541256566
+Lcode_541256566:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 1
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_541256566
+mov rsi, 0
+mov rsi, 1
+jmp create_vector_541256566
+vector_size_is_total_num_of_params_541256566:
+mov rsi, [rbp + 8*3]
+create_vector_541256566:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 1
+mov rcx, 0
+copy_non_opt_params_list_for_opt_541256566:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_541256566
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_541256566
+end_copy_non_opt_params_list_for_opt_541256566:
+mov rsi, [rbp + 8*3]
+cmp rsi, 1
+je enlarge_stack_541256566
+shrink_stack_541256566:
+mov rdi, 1
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_541256566:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_541256566
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_541256566
+pop_and_adjust_stack_shrink_stack_541256566:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 1
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_541256566:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_541256566
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_541256566
+end_shrink_push_non_optional_params_loop_541256566:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_541256566
+push qword [r9 + 8*r12]
+dont_push_541256566:
+mov rsi, 0
+mov rsi, 1
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_541256566
+enlarge_stack_541256566:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_541256566:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_541256566
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_541256566
+end_enlarge_push_non_optional_params_loop_541256566:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_541256566:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_621109403:
+mov rbx, [rsp + 8]
+
+leave
+ret
+Lcont_541256566:
+
+
+
+
+leave
+ret
+Lcont_514260817:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_483417528:
+
+leave
+ret
+Lcont_116195277:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_384027154:
+
+mov [fvar_tbl + 8*21], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*24]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*23]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*38]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*22]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*21]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*4]
+
+push rax
+
+push 6
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_151124289)
+jmp Lcont_151124289
+Lcode_151124289:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+23
+
+push rax
+
+push 1
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_829527378:
+cmp rdi, rcx
+je after_params_copy_829527378
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_829527378
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_829527378:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_829527378:
+cmp r9, rcx
+je after_env_copy_829527378
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_829527378
+after_env_copy_829527378:
+
+MAKE_CLOSURE(rax, rbx, Lcode_829527378)
+jmp Lcont_829527378
+Lcode_829527378:
+push rbp
+mov rbp, rsp
+
+mov qword rax, [rbp + 32]
+MALLOC r11, 8
+mov qword [r11], rax
+mov rax, r11
+
+mov qword [rbp + 32], rax
+mov rax, SOB_VOID_ADDRESS
+
+
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_236572:
+cmp rdi, rcx
+je after_params_copy_236572
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_236572
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_236572:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_236572:
+cmp r9, rcx
+je after_env_copy_236572
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_236572
+after_env_copy_236572:
+
+MAKE_CLOSURE(rax, rbx, Lcode_236572)
+jmp Lcont_236572
+Lcode_236572:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_382642037:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_528306746
+mov rax, const_tbl+4
+
+jmp Lexit_933494370
+Lelse_528306746:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_517064495:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_6449431:
+
+cmp rax, SOB_FALSE_ADDRESS
+jne Lexit_441436369
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_918145467:
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_864270887:
+
+Lexit_441436369:
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_53231182:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_514988712
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 40]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_653586493:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_567875788:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_831201747:
+
+jmp Lexit_338771299
+Lelse_514988712:
+mov rax, const_tbl+2
+
+Lexit_338771299:
+
+Lexit_933494370:
+
+leave
+ret
+Lcont_236572:
+
+
+push rax
+mov qword rax, [rbp + 32]
+
+pop qword [rax]
+mov rax, SOB_VOID_ADDRESS
+
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_486015704:
+cmp rdi, rcx
+je after_params_copy_486015704
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_486015704
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_486015704:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*copying the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_486015704:
+cmp r9, rcx
+je after_env_copy_486015704
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_486015704
+after_env_copy_486015704:
+
+MAKE_CLOSURE(rax, rbx, Lcode_486015704)
+jmp Lcont_486015704
+Lcode_486015704:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 1
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_486015704
+mov rsi, 0
+mov rsi, 1
+jmp create_vector_486015704
+vector_size_is_total_num_of_params_486015704:
+mov rsi, [rbp + 8*3]
+create_vector_486015704:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 1
+mov rcx, 0
+copy_non_opt_params_list_for_opt_486015704:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_486015704
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_486015704
+end_copy_non_opt_params_list_for_opt_486015704:
+mov rsi, [rbp + 8*3]
+cmp rsi, 1
+je enlarge_stack_486015704
+shrink_stack_486015704:
+mov rdi, 1
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_486015704:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_486015704
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_486015704
+pop_and_adjust_stack_shrink_stack_486015704:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 1
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_486015704:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_486015704
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_486015704
+end_shrink_push_non_optional_params_loop_486015704:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_486015704
+push qword [r9 + 8*r12]
+dont_push_486015704:
+mov rsi, 0
+mov rsi, 1
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_486015704
+enlarge_stack_486015704:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_486015704:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_486015704
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_486015704
+end_enlarge_push_non_optional_params_loop_486015704:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_486015704:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_906512134:
+mov rbx, [rsp + 8]
+
+leave
+ret
+Lcont_486015704:
+
+
+
+
+leave
+ret
+Lcont_829527378:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_98695905:
+
+leave
+ret
+Lcont_151124289:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_538829788:
+
+mov [fvar_tbl + 8*40], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*22]
+
+push rax
+
+push 1
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_895730577)
+jmp Lcont_895730577
+Lcode_895730577:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_66750478:
+cmp rdi, rcx
+je after_params_copy_66750478
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_66750478
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_66750478:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_66750478:
+cmp r9, rcx
+je after_env_copy_66750478
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_66750478
+after_env_copy_66750478:
+
+MAKE_CLOSURE(rax, rbx, Lcode_66750478)
+jmp Lcont_66750478
+Lcode_66750478:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+41
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_111811881:
+
+leave
+ret
+Lcont_66750478:
+
+
+leave
+ret
+Lcont_895730577:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_560617979:
+
+mov [fvar_tbl + 8*41], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*19]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*21]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*9]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*10]
+
+push rax
+
+push 4
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_81478918)
+jmp Lcont_81478918
+Lcode_81478918:
+push rbp
+mov rbp, rsp
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_668997420:
+cmp rdi, rcx
+je after_params_copy_668997420
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_668997420
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_668997420:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_668997420:
+cmp r9, rcx
+je after_env_copy_668997420
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_668997420
+after_env_copy_668997420:
+
+MAKE_CLOSURE(rax, rbx, Lcode_668997420)
+jmp Lcont_668997420
+Lcode_668997420:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+23
+
+push rax
+
+push 1
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_64012633:
+cmp rdi, rcx
+je after_params_copy_64012633
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_64012633
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_64012633:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_64012633:
+cmp r9, rcx
+je after_env_copy_64012633
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_64012633
+after_env_copy_64012633:
+
+MAKE_CLOSURE(rax, rbx, Lcode_64012633)
+jmp Lcont_64012633
+Lcode_64012633:
+push rbp
+mov rbp, rsp
+
+mov qword rax, [rbp + 32]
+MALLOC r11, 8
+mov qword [r11], rax
+mov rax, r11
+
+mov qword [rbp + 32], rax
+mov rax, SOB_VOID_ADDRESS
+
+
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_460100181:
+cmp rdi, rcx
+je after_params_copy_460100181
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_460100181
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_460100181:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 32			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 3			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_460100181:
+cmp r9, rcx
+je after_env_copy_460100181
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_460100181
+after_env_copy_460100181:
+
+MAKE_CLOSURE(rax, rbx, Lcode_460100181)
+jmp Lcont_460100181
+Lcode_460100181:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+41
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 16]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_271720753:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_363499359
+mov qword rax, [rbp + 40]
+
+jmp Lexit_578335420
+Lelse_363499359:
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 16]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_631183990:
+
+push rax
+
+push 2
+mov rax, qword [fvar_tbl + 8*25]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_243779707:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+32
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 16]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_822188825:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_360549859:
+
+Lexit_578335420:
+
+leave
+ret
+Lcont_460100181:
+
+
+push rax
+mov qword rax, [rbp + 32]
+
+pop qword [rax]
+mov rax, SOB_VOID_ADDRESS
+
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+1
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+32
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_937727265:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_230780211:
+
+push rax
+
+push 2
+mov qword rax, [rbp + 32]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_94509538:
+
+
+
+leave
+ret
+Lcont_64012633:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_562514557:
+
+leave
+ret
+Lcont_668997420:
+
+
+leave
+ret
+Lcont_81478918:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_839199170:
+
+mov [fvar_tbl + 8*42], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, qword [fvar_tbl + 8*14]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*24]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*23]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*16]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*6]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*5]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*3]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*1]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*2]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*42]
+
+push rax
+
+mov rax, qword [fvar_tbl + 8*22]
+
+push rax
+
+push 11
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_667740834)
+jmp Lcont_667740834
+Lcode_667740834:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+23
+
+push rax
+
+push 1
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_100586209:
+cmp rdi, rcx
+je after_params_copy_100586209
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_100586209
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_100586209:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 16			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 1			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_100586209:
+cmp r9, rcx
+je after_env_copy_100586209
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_100586209
+after_env_copy_100586209:
+
+MAKE_CLOSURE(rax, rbx, Lcode_100586209)
+jmp Lcont_100586209
+Lcode_100586209:
+push rbp
+mov rbp, rsp
+
+mov qword rax, [rbp + 32]
+MALLOC r11, 8
+mov qword [r11], rax
+mov rax, r11
+
+mov qword [rbp + 32], rax
+mov rax, SOB_VOID_ADDRESS
+
+
+
+
+mov rsi, [rbp + 8 * 3]			;; (*rsi holds the number of parametres on the stack*)
+inc rsi
+lea rsi, [rsi * 8]
+MALLOC rdx, rsi			;; (*now rdx points to the allocated memory for the new vector*)
+mov rcx, [rbp + 8 * 3]
+mov rdi, 0			;;(*rdi will be used to point to the next address in the vector*)
+
+mov r9, 4
+;; (*start of loop to copy parameters to the new allocated vector*)
+copy_params_loop_427470990:
+cmp rdi, rcx
+je after_params_copy_427470990
+mov rsi, [rbp + 8 * r9]			;;(*now rsi points to the next parameter on the stack*)
+mov [rdx + 8*rdi], rsi			;;(*copying the parameter to the new allocated vector*)
+inc rdi
+inc r9
+jmp copy_params_loop_427470990
+;; (*now rdx points to the new vector to be added to ext_env*)
+;; (*mov 0 to all neccessary registers*)
+after_params_copy_427470990:
+mov qword [rdx + 8*rdi], SOB_NIL_ADDRESS
+mov rcx, 0
+mov rdi, 0
+mov rsi, 0
+;; (*now we need to create ext_env by copying env and adding the new vector*)
+MALLOC rbx, 24			;;(*rbx points to a new allocated space for ext_env*)
+mov [rbx], rdx			;;(*coping the new vector to ext_env[0]*)
+mov rsi, [rbp + 8 * 2]			;;(*rsi points to current env*)
+mov rcx, 2			;;(*rcx is the loop counter*)
+mov r9, 0			;;(*r9 will be used to point to the next vector in current env to be copied*)
+mov rdi, 1			;;(*rdi will be used to point to the next address in ext_env*)
+mov r8, 0
+;; (*start of loop for copying env[i] to ext_env[i+1]*)
+copy_env_loop_427470990:
+cmp r9, rcx
+je after_env_copy_427470990
+mov r8, [rsi + 8 * r9]			;;(*r8 points to the next vector int current env to be copied*) 
+mov [rbx + 8 * rdi], r8			;;(*copying the pointer to the vector from env to ext_env*)
+inc r9
+inc rdi
+jmp copy_env_loop_427470990
+after_env_copy_427470990:
+
+MAKE_CLOSURE(rax, rbx, Lcode_427470990)
+jmp Lcont_427470990
+Lcode_427470990:
+push rbp
+mov rbp, rsp
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_216710580:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_37853549
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 16]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_706489798:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_170902041
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_666619395:
+
+jmp Lexit_53715045
+Lelse_170902041:
+mov rax, const_tbl+2
+
+Lexit_53715045:
+
+jmp Lexit_303249613
+Lelse_37853549:
+mov rax, const_tbl+2
+
+Lexit_303249613:
+
+cmp rax, SOB_FALSE_ADDRESS
+jne Lexit_410897316
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_489280857:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_231096776
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 24]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_151230915:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_970335524
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_634945416:
+
+jmp Lexit_772529697
+Lelse_970335524:
+mov rax, const_tbl+2
+
+Lexit_772529697:
+
+jmp Lexit_344029323
+Lelse_231096776:
+mov rax, const_tbl+2
+
+Lexit_344029323:
+
+cmp rax, SOB_FALSE_ADDRESS
+jne Lexit_410897316
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_625546569:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_246627487
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 32]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_37125678:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_630804862
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 64]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_49135310:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 64]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_588220468:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_35009346:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_988088953
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 72]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_66860662:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 72]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_419625899:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_787224177:
+
+jmp Lexit_232886063
+Lelse_988088953:
+mov rax, const_tbl+2
+
+Lexit_232886063:
+
+jmp Lexit_579787587
+Lelse_630804862:
+mov rax, const_tbl+2
+
+Lexit_579787587:
+
+jmp Lexit_798681974
+Lelse_246627487:
+mov rax, const_tbl+2
+
+Lexit_798681974:
+
+cmp rax, SOB_FALSE_ADDRESS
+jne Lexit_410897316
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 40]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_747844691:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_402783938
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 40]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_100958969:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_72469400
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 80]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_612717911:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 80]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_116124369:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 0]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_297010890:
+
+jmp Lexit_306916575
+Lelse_72469400:
+mov rax, const_tbl+2
+
+Lexit_306916575:
+
+jmp Lexit_217560096
+Lelse_402783938:
+mov rax, const_tbl+2
+
+Lexit_217560096:
+
+cmp rax, SOB_FALSE_ADDRESS
+jne Lexit_410897316
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 48]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_3761444:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_654168528
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 48]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_528749989:
+
+cmp rax, SOB_FALSE_ADDRESS
+je Lelse_25705927
+
+push SOB_NIL_ADDRESS
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_839435742:
+
+push rax
+
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 1
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 8]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_609785659:
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 0]
+mov rax, qword [rax + 0]
+
+mov rax, qword [rax]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_941339251:
+
+jmp Lexit_165446385
+Lelse_25705927:
+mov rax, const_tbl+2
+
+Lexit_165446385:
+
+jmp Lexit_453879695
+Lelse_654168528:
+mov rax, const_tbl+2
+
+Lexit_453879695:
+
+cmp rax, SOB_FALSE_ADDRESS
+jne Lexit_410897316
+
+push SOB_NIL_ADDRESS
+
+mov qword rax, [rbp + 40]
+
+push rax
+
+mov qword rax, [rbp + 32]
+
+push rax
+
+push 2
+mov rax, qword [rbp + 16]
+mov rax, qword [rax + 8]
+mov rax, qword [rax + 56]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_720473698:
+
+Lexit_410897316:
+
+leave
+ret
+Lcont_427470990:
+
+
+push rax
+mov qword rax, [rbp + 32]
+
+pop qword [rax]
+mov rax, SOB_VOID_ADDRESS
+
+
+mov qword rax, [rbp + 32]
+
+mov rax, qword [rax]
+
+
+
+leave
+ret
+Lcont_100586209:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_93771885:
+
+leave
+ret
+Lcont_667740834:
+
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_830445955:
+
+mov [fvar_tbl + 8*43], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+MAKE_CLOSURE(rax, SOB_NIL_ADDRESS, Lcode_528429947)
+jmp Lcont_528429947
+Lcode_528429947:
+push rbp
+mov r14, rbp
+mov rbp, rsp
+mov rdi, 2
+mov rsi, qword [rbp + 8*3]
+cmp qword rdi, rsi
+jb vector_size_is_total_num_of_params_528429947
+mov rsi, 0
+mov rsi, 2
+jmp create_vector_528429947
+vector_size_is_total_num_of_params_528429947:
+mov rsi, [rbp + 8*3]
+create_vector_528429947:
+lea rsi, [rsi*8]
+mov r9, 0
+mov rbx, 0
+mov rdx, 0
+MALLOC r9, rsi
+mov rsi, 0
+mov rsi, 2
+mov rcx, 0
+copy_non_opt_params_list_for_opt_528429947:
+cmp rcx, rsi
+je end_copy_non_opt_params_list_for_opt_528429947
+mov rbx, qword PVAR(rcx)
+mov qword [r9 + 8 * rcx], rbx
+inc rcx
+jmp copy_non_opt_params_list_for_opt_528429947
+end_copy_non_opt_params_list_for_opt_528429947:
+mov rsi, [rbp + 8*3]
+cmp rsi, 2
+je enlarge_stack_528429947
+shrink_stack_528429947:
+mov rdi, 2
+dec rsi
+mov r12, 0
+mov r11, 0
+mov r10, 0
+mov r11, PVAR(rsi)
+dec rsi
+MAKE_PAIR(r12, r11, SOB_NIL_ADDRESS)
+dec rdi
+create_opt_params_list_528429947:
+cmp rdi, rsi
+je pop_and_adjust_stack_shrink_stack_528429947
+mov r11, qword PVAR(rsi)
+mov r10, r12
+MAKE_PAIR(r12, r11, r10)
+dec rsi
+jmp create_opt_params_list_528429947
+pop_and_adjust_stack_shrink_stack_528429947:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+mov rbx, 0
+lea rbx, [rsi*8]
+add rsp, rbx
+push qword r12
+mov r12, 0
+mov r12, 2
+dec r12
+mov rbx, 0
+shrink_push_non_optional_params_loop_528429947:
+cmp rbx, r12
+jbe end_shrink_push_non_optional_params_loop_528429947
+push qword [r9 + 8*r12]
+dec r12
+jmp shrink_push_non_optional_params_loop_528429947
+end_shrink_push_non_optional_params_loop_528429947:
+mov r15, 0
+dec r15
+cmp r15, r12
+je dont_push_528429947
+push qword [r9 + 8*r12]
+dont_push_528429947:
+mov rsi, 0
+mov rsi, 2
+inc rsi
+push rsi
+push rcx
+push rdi
+jmp body_of_opt_528429947
+enlarge_stack_528429947:
+mov rsi, 0
+mov rdi, 0
+mov rcx,0
+mov rbx, 0
+mov rdx, 0
+mov rdx, qword [rbp + 8*3]
+mov rdi, [rbp + 8]
+mov rcx, [rbp + 8*2]
+mov rsi, [rbp + 8*3]
+add rsp, 32
+lea rbx, [rsi*8]
+add rsp, rbx
+push SOB_NIL_ADDRESS
+mov r10, 0
+mov r11, 0
+mov r10, rsi
+dec r10
+mov rbx, 0
+dec rbx
+enlarge_push_non_optional_params_loop_528429947:
+cmp rbx, r10
+je end_enlarge_push_non_optional_params_loop_528429947
+push qword [r9 + 8*r10]
+dec r10
+jmp enlarge_push_non_optional_params_loop_528429947
+end_enlarge_push_non_optional_params_loop_528429947:
+mov rsi, rdx
+inc rsi
+push rsi
+push rcx
+push rdi
+body_of_opt_528429947:
+mov rbp, r14
+push rbp
+mov rbp, rsp
+mov qword rax, [rbp + 48]
+
+leave
+ret
+Lcont_528429947:
+
+
+mov [fvar_tbl + 8*44], rax
+mov rax, SOB_VOID_ADDRESS
+	call write_sob_if_not_void
+
+
+push SOB_NIL_ADDRESS
+
+mov rax, const_tbl+52
+
+push rax
+
+mov rax, const_tbl+32
+
+push rax
+
+push 2
+mov rax, qword [fvar_tbl + 8*44]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_85000187:
 
 	call write_sob_if_not_void
 
@@ -424,6 +7643,7 @@ set_cdr:
 
 apply:
     push rbp
+    mov r14, rbp    ; saving old rbp in r14
     mov rbp, rsp
     mov rcx, qword [rbp + 8 * 3]   ; rcx holds the current args count
     mov r11, 0          ; cleaning r11 - r11 will hold the list length
@@ -507,12 +7727,13 @@ apply:
     end_push_new_arguments:
     ; now we need to push the new args_count, the old env and the old ret address
     ; rbx still points to the procedure argument of apply
+    mov rbp, r14    ; returning to old rbp
     push rsi        ; pushing new args count
     push qword [rbx + 1]        ; pushing the closure env on the stack
     push r8         ; pushing the old ret address
     jmp [rbx + 9]        ; calling the procedure argument
-    ;leave 
-    ;ret
+    leave
+    ret
 
 is_boolean:
     push rbp

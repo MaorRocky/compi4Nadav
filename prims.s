@@ -41,6 +41,7 @@ set_cdr:
 
 apply:
     push rbp
+    mov r14, rbp    ; saving old rbp in r14
     mov rbp, rsp
     mov rcx, qword [rbp + 8 * 3]   ; rcx holds the current args count
     mov r11, 0          ; cleaning r11 - r11 will hold the list length
@@ -124,12 +125,13 @@ apply:
     end_push_new_arguments:
     ; now we need to push the new args_count, the old env and the old ret address
     ; rbx still points to the procedure argument of apply
+    mov rbp, r14    ; returning to old rbp
     push rsi        ; pushing new args count
     push qword [rbx + 1]        ; pushing the closure env on the stack
     push r8         ; pushing the old ret address
     jmp [rbx + 9]        ; calling the procedure argument
-    ;leave 
-    ;ret
+    leave
+    ret
 
 is_boolean:
     push rbp

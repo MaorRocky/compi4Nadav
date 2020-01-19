@@ -410,7 +410,7 @@ let rec main_generate consts fvars depth expr' =
       "push rbp\n" ^
       "mov rbp, rsp\n" ^
       (main_generate consts fvars (depth+1) body) ^
-      "my_stop:\n" ^
+      (* "my_stop:\n" ^ *)
       "mov rbx, [rsp + 8]\n" ^
       "\nleave\n" ^ 
       "ret\n" ^ 
@@ -554,6 +554,7 @@ let rec main_generate consts fvars depth expr' =
 
       (*start of enlarge stack*)
       "enlarge_stack_" ^ (str_num) ^ ":\n" ^
+      
       (*r9 already points to a vector containig all the non-optional parameters*)
       (*we just need to pop the stack and push all the parameters plus the empty list*)
       "mov rsi, 0\nmov rdi, 0\nmov rcx,0\nmov rbx, 0\nmov rdx, 0\n" ^ (*cleaning registers*)
@@ -567,11 +568,12 @@ let rec main_generate consts fvars depth expr' =
       "push SOB_NIL_ADDRESS\n" ^ (*pushing the empty list as the last argument*)
       "mov r10, 0\nmov r11, 0\n" ^ (*cleaning*)
       "mov r10, rsi\n" ^ (*(str_num_non_opt_params) ^ "\n" ^*)
-      "dec r10\n" ^
+      "dec r10\n" ^ (*r10 holds the args_count - 1, it will be used to copy the arguments from the vector pointed by r9*)
       "mov rbx, 0\n" ^
+      "dec rbx\n" ^
       "enlarge_push_non_optional_params_loop_" ^ (str_num) ^ ":\n" ^
       "cmp rbx, r10\n" ^
-      "jb end_enlarge_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
+      "je end_enlarge_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
       "push qword [r9 + 8*r10]\n" ^
       "dec r10\n" ^
       "jmp enlarge_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
@@ -714,11 +716,12 @@ let rec main_generate consts fvars depth expr' =
       "push SOB_NIL_ADDRESS\n" ^ (*pushing the empty list as the last argument*)
       "mov r10, 0\nmov r11, 0\n" ^ (*cleaning*)
       "mov r10, rsi\n" ^ (*(str_num_non_opt_params) ^ "\n" ^*)
-      "dec r10\n" ^
+      "dec r10\n" ^ (*r10 holds the args_count - 1, it will be used to copy the arguments from the vector pointed by r9*)
       "mov rbx, 0\n" ^
+      "dec rbx\n" ^
       "enlarge_push_non_optional_params_loop_" ^ (str_num) ^ ":\n" ^
       "cmp rbx, r10\n" ^
-      "jb end_enlarge_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
+      "je end_enlarge_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
       "push qword [r9 + 8*r10]\n" ^
       "dec r10\n" ^
       "jmp enlarge_push_non_optional_params_loop_" ^ (str_num) ^ "\n" ^
@@ -823,21 +826,63 @@ let rec main_generate consts fvars depth expr' =
       | [] -> str in
     let push_arguments = args_str (List.rev args) "\npush SOB_NIL_ADDRESS\n" in
     (*let operator_str = main_generate consts fvars depth operator in*)
-    (*"my_stop:\n" ^*)
     "mov r13, qword [rbp + 8]\n" ^ (*save old return address in r13*)
     (*now we need to fix the stack*)
-    "mov rsi, [rbp + 8 * 3]\n" ^ (*rsi holds the previous args_count*)
-    "inc rsi\n" ^ (*adding 1 for magic*)
-    "shl rsi, 3\n" ^ (*rsi holds the size of all the arguments on the stack*)
-    "add rsp, 32\n" ^ (*popping old rbp, old ret address, old env and old args_count*)
-    "add rsp, rsi\n" ^ (*popping all the arguments*)
-    "mov rbp, rsp\n" ^
     push_arguments ^ "\n" ^
     "push " ^ string_of_int((List.length args)) ^ "\n" ^
-    (main_generate consts fvars depth operator) ^
+    operator_str ^
     (*now rax points to the closure*)
-    "push qword [rax + 1]\n" ^ (*pushing new env on the stack*)
-    "push r13\n" ^ (*pushing old return address*)
+    "push qword [rax + 1]\n" ^ (*pushing the env*)
+    "push qword [rbp + 8]\n" ^ (*pushing old return address*)
+    (*now rsp points to new args_count and rbp point to the old frame*)
+    "mov rsi, [rbp + 8 * 3]\n" ^ (*rsi holds old args_count*)
+    "shl rsi, 3\n" ^ 
+    (*we need to calculate the start address of the old frame on the stack*)
+    "mov rbx, 0\n" ^ (*cleaning*)
+    "mov rbx, rbp\n" ^ (*rbx will be used to calculate the start of the old frame*)
+    "add rbx, 32\n" ^ (*adding the sizes of old rbp, env, return address and args_count*)
+    "add rbx, rsi\n" ^ (*adding the sizeof all the arguments*)
+    (*now rbx points to the address from where we need to start overwriting the old frame*)
+    (*first let's move all the new arguments to the old frame address*)
+    (*we need to calculate the size ofthe new frame*)
+    "mov rdx, [rsp + 16]\n" ^ (*new args count in rdx*)
+    (*"dec rdx\n" ^ (*this is becuse we don't want to copy magic because it already exist in the old frame*)*)
+    "shl rdx, 3\n" ^
+    "mov rcx, 0\n" ^ (*cleaning*)
+    "mov rcx, rsp\n" ^ (*rcx will be used to pint to the next qword to move to the old frame address*)
+    "add rcx, 24\n" ^ (*adding 16 for env, return address and args_count*)
+    "add rcx, rdx\n" ^ (*adding the size of all arguments*)
+    (*rbx points to the start of the old frame (the last argument of the old frame)
+      rcx points to the start of the new one (the last argument of the frame)*)
+    "mov r9, 0\nmov r10, 0\n" ^ (*cleaning*)
+    "mov r9, [rsp + 16]\n" ^ 
+    (*"dec r9\n" ^ (*this is becuse we don't want to copy magic because it already exist in the old frame*)*)
+    "add r9, 3\n" ^ (*r9 will be our loop counter where we copy the new frame to the old frame address*)
+    "move_move_frame_loop_" ^ (str_num) ^ ":\n" ^
+    "cmp r9, 0\n" ^
+    "je end_of_frame_loop_" ^ (str_num) ^ "\n" ^
+    "mov r10, qword [rcx]\n" ^
+    "mov qword [rbx], r10\n" ^
+    "sub rcx, 8\nsub rbx,8\n" ^ 
+    "dec r9\n" ^
+    "jmp move_move_frame_loop_" ^ (str_num) ^ "\n" ^
+    "end_of_frame_loop_" ^ (str_num) ^ ":\n" ^
+    (*now rbx point points to the base address of the new frame after it was copied*)
+    "mov r10, qword [rcx]\n" ^
+    "mov qword [rbx], r10\n" ^
+    (*"add rbp, 8\n" ^*)
+    (*"mov rdi, [rbp]\n" ^
+    "mov r8, [rbp + 8]\n" ^
+    "mov r9, [rbp + 8*2]\n" ^
+    "mov r10, [rbp + 8*3]\n" ^
+    "mov r10, [r10 + 1]\n" ^
+    "mov r11, [rbp + 8*4]\n" ^
+    "mov r11, [r11 + 1]\n" ^
+    "mov r12, [rbp + 8*5]\n" ^
+    "mov r12, [r12 + 1]\n" ^
+    "mov r13, [rbp + 8*6]\n" ^
+    "mov rdx, SOB_NIL_ADDRESS\n" ^*)
+    "mov rsp, rbp\n" ^
     "jmp [rax + 9]\n"; (*jumping to function code*)
 
 
