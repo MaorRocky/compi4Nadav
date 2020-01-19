@@ -1,7 +1,7 @@
 (define foo
-    (lambda (x y . z)
-        z))
+  (lambda (x y z)
+    (+ x y)))
 
-(foo 1 2)
+(foo 1 2 3)
        
 

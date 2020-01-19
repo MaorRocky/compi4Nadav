@@ -377,7 +377,7 @@ let rec main_generate consts fvars depth expr' =
                                             then (top_level_lambda_opt_helper consts fvars depth body (List.length params))
                                             else (nested_lambda_opt_helper consts fvars depth body (List.length params)))
   | Applic'(operator, args) -> (applic_helper consts fvars depth operator args)
-  | ApplicTP'(operator, args) -> (applic_helper consts fvars depth operator args)
+  | ApplicTP'(operator, args) -> (applic_tp_helper consts fvars depth operator args)
   | _ -> ";THIS IS A MISTAKE";
 
   and if_helper consts fvars test dit dif depth =
@@ -410,7 +410,6 @@ let rec main_generate consts fvars depth expr' =
       "push rbp\n" ^
       "mov rbp, rsp\n" ^
       (main_generate consts fvars (depth+1) body) ^
-      (* "my_stop:\n" ^ *)
       "mov rbx, [rsp + 8]\n" ^
       "\nleave\n" ^ 
       "ret\n" ^ 
@@ -817,6 +816,7 @@ let rec main_generate consts fvars depth expr' =
   
   
   and applic_tp_helper consts fvars depth operator args =
+    let str_num = (random_str_num 5) in
     let rec args_str revresed_args str = (*reversed because the arguments are pushed in reversed order*)
       match revresed_args with
       | arg :: rest -> (let next_str = str ^ "\n" ^
@@ -825,7 +825,7 @@ let rec main_generate consts fvars depth expr' =
                         args_str rest next_str)
       | [] -> str in
     let push_arguments = args_str (List.rev args) "\npush SOB_NIL_ADDRESS\n" in
-    (*let operator_str = main_generate consts fvars depth operator in*)
+    let operator_str = main_generate consts fvars depth operator in
     "mov r13, qword [rbp + 8]\n" ^ (*save old return address in r13*)
     (*now we need to fix the stack*)
     push_arguments ^ "\n" ^
@@ -841,16 +841,17 @@ let rec main_generate consts fvars depth expr' =
     "mov rbx, 0\n" ^ (*cleaning*)
     "mov rbx, rbp\n" ^ (*rbx will be used to calculate the start of the old frame*)
     "add rbx, 32\n" ^ (*adding the sizes of old rbp, env, return address and args_count*)
-    "add rbx, rsi\n" ^ (*adding the sizeof all the arguments*)
+    "add rbx, rsi\n" ^ (*adding the size of all the arguments*)
     (*now rbx points to the address from where we need to start overwriting the old frame*)
     (*first let's move all the new arguments to the old frame address*)
-    (*we need to calculate the size ofthe new frame*)
+    (*we need to calculate the size of the new frame*)
     "mov rdx, [rsp + 16]\n" ^ (*new args count in rdx*)
+    "my_stop:\n" ^
     (*"dec rdx\n" ^ (*this is becuse we don't want to copy magic because it already exist in the old frame*)*)
     "shl rdx, 3\n" ^
     "mov rcx, 0\n" ^ (*cleaning*)
-    "mov rcx, rsp\n" ^ (*rcx will be used to pint to the next qword to move to the old frame address*)
-    "add rcx, 24\n" ^ (*adding 16 for env, return address and args_count*)
+    "mov rcx, rsp\n" ^ (*rcx will be used to point to the next qword to move to the old frame address*)
+    "add rcx, 24\n" ^ (*adding 24 for env, old return address and args_count*)
     "add rcx, rdx\n" ^ (*adding the size of all arguments*)
     (*rbx points to the start of the old frame (the last argument of the old frame)
       rcx points to the start of the new one (the last argument of the frame)*)
@@ -858,6 +859,7 @@ let rec main_generate consts fvars depth expr' =
     "mov r9, [rsp + 16]\n" ^ 
     (*"dec r9\n" ^ (*this is becuse we don't want to copy magic because it already exist in the old frame*)*)
     "add r9, 3\n" ^ (*r9 will be our loop counter where we copy the new frame to the old frame address*)
+    (*adding 3 for ret_address, env and args count*)
     "move_move_frame_loop_" ^ (str_num) ^ ":\n" ^
     "cmp r9, 0\n" ^
     "je end_of_frame_loop_" ^ (str_num) ^ "\n" ^
@@ -882,7 +884,6 @@ let rec main_generate consts fvars depth expr' =
     "mov r12, [r12 + 1]\n" ^
     "mov r13, [rbp + 8*6]\n" ^
     "mov rdx, SOB_NIL_ADDRESS\n" ^*)
-    "mov rsp, rbp\n" ^
     "jmp [rax + 9]\n"; (*jumping to function code*)
 
 
