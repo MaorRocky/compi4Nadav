@@ -1,7 +1,16 @@
 (define foo
   (lambda (x y z)
-    (+ x y)))
+    (lambda (a b c)
+        (+ a b c x y z))))
 
-(foo 1 2 3)
+(define foo2
+    (lambda()
+        ((foo 1 2 3) 4 5 6)))
+
+(foo2)
+
+
+
+
        
 

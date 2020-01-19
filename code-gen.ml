@@ -846,7 +846,6 @@ let rec main_generate consts fvars depth expr' =
     (*first let's move all the new arguments to the old frame address*)
     (*we need to calculate the size of the new frame*)
     "mov rdx, [rsp + 16]\n" ^ (*new args count in rdx*)
-    "my_stop:\n" ^
     (*"dec rdx\n" ^ (*this is becuse we don't want to copy magic because it already exist in the old frame*)*)
     "shl rdx, 3\n" ^
     "mov rcx, 0\n" ^ (*cleaning*)
@@ -872,18 +871,7 @@ let rec main_generate consts fvars depth expr' =
     (*now rbx point points to the base address of the new frame after it was copied*)
     "mov r10, qword [rcx]\n" ^
     "mov qword [rbx], r10\n" ^
-    (*"add rbp, 8\n" ^*)
-    (*"mov rdi, [rbp]\n" ^
-    "mov r8, [rbp + 8]\n" ^
-    "mov r9, [rbp + 8*2]\n" ^
-    "mov r10, [rbp + 8*3]\n" ^
-    "mov r10, [r10 + 1]\n" ^
-    "mov r11, [rbp + 8*4]\n" ^
-    "mov r11, [r11 + 1]\n" ^
-    "mov r12, [rbp + 8*5]\n" ^
-    "mov r12, [r12 + 1]\n" ^
-    "mov r13, [rbp + 8*6]\n" ^
-    "mov rdx, SOB_NIL_ADDRESS\n" ^*)
+    "mov rsp, rbx\n" ^
     "jmp [rax + 9]\n"; (*jumping to function code*)
 
 
