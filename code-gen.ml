@@ -377,7 +377,7 @@ let rec main_generate consts fvars depth expr' =
                                             then (top_level_lambda_opt_helper consts fvars depth body (List.length params))
                                             else (nested_lambda_opt_helper consts fvars depth body (List.length params)))
   | Applic'(operator, args) -> (applic_helper consts fvars depth operator args)
-  | ApplicTP'(operator, args) -> (applic_tp_helper consts fvars depth operator args)
+  | ApplicTP'(operator, args) -> (applic_helper consts fvars depth operator args)
   | _ -> ";THIS IS A MISTAKE";
 
   and if_helper consts fvars test dit dif depth =

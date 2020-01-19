@@ -19,13 +19,7 @@ MAKE_LITERAL_SYMBOL(const_tbl+6)
 MAKE_LITERAL_INT(1)
 MAKE_LITERAL_INT(0)
 MAKE_LITERAL_CHAR(0)
-MAKE_LITERAL_INT(2)
-MAKE_LITERAL_INT(3)
-MAKE_LITERAL_INT(4)
-MAKE_LITERAL_PAIR(const_tbl+70, const_tbl+1)
-MAKE_LITERAL_PAIR(const_tbl+61, const_tbl+79)
-MAKE_LITERAL_PAIR(const_tbl+52, const_tbl+96)
-MAKE_LITERAL_PAIR(const_tbl+32, const_tbl+113)
+MAKE_LITERAL_INT(8)
 
 ;;; These macro definitions are required for the primitive
 ;;; definitions in the epilogue to work properly
@@ -200,7 +194,6 @@ jmp Lcont_858766356
 Lcode_858766356:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -489,7 +482,6 @@ after_applic_283791396:
 
 cmp rax, SOB_FALSE_ADDRESS
 je Lelse_847232054
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -585,42 +577,18 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 8]
 mov rax, qword [rax + 24]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_942578091:
-cmp r9, 0
-je end_of_frame_loop_942578091
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_942578091
-end_of_frame_loop_942578091:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_942578091:
 
 jmp Lexit_308140838
 Lelse_847232054:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -786,38 +754,15 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 8]
 mov rax, qword [rax + 24]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_304507802:
-cmp r9, 0
-je end_of_frame_loop_304507802
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_304507802
-end_of_frame_loop_304507802:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_304507802:
 
 Lexit_308140838:
 
@@ -846,38 +791,15 @@ leave
 ret
 Lcont_743829425:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_139310441:
-cmp r9, 0
-je end_of_frame_loop_139310441
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_139310441
-end_of_frame_loop_139310441:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_139310441:
 
 leave
 ret
@@ -902,7 +824,6 @@ jmp Lcont_541080542
 Lcode_541080542:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -1046,7 +967,6 @@ mov qword rax, [rbp + 32]
 
 jmp Lexit_771724904
 Lelse_844370963:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -1085,38 +1005,15 @@ push rax
 
 push 3
 mov rax, qword [fvar_tbl + 8*30]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_367008404:
-cmp r9, 0
-je end_of_frame_loop_367008404
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_367008404
-end_of_frame_loop_367008404:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_367008404:
 
 Lexit_771724904:
 
@@ -1124,38 +1021,15 @@ leave
 ret
 Lcont_793128188:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_269997124:
-cmp r9, 0
-je end_of_frame_loop_269997124
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_269997124
-end_of_frame_loop_269997124:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_269997124:
 
 leave
 ret
@@ -1171,7 +1045,6 @@ jmp Lcont_525340320
 Lcode_525340320:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -1322,7 +1195,6 @@ jmp Lcont_222584391
 Lcode_222584391:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -1466,7 +1338,6 @@ mov qword rax, [rbp + 32]
 
 jmp Lexit_675348438
 Lelse_551702454:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -1509,38 +1380,15 @@ mov rax, qword [rax + 8]
 mov rax, qword [rax + 8]
 
 mov rax, qword [rax]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_67564655:
-cmp r9, 0
-je end_of_frame_loop_67564655
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_67564655
-end_of_frame_loop_67564655:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_67564655:
 
 Lexit_675348438:
 
@@ -1548,38 +1396,15 @@ leave
 ret
 Lcont_355434846:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_157380188:
-cmp r9, 0
-je end_of_frame_loop_157380188
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_157380188
-end_of_frame_loop_157380188:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_157380188:
 
 leave
 ret
@@ -1593,7 +1418,6 @@ pop qword [rax]
 mov rax, SOB_VOID_ADDRESS
 
 
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -1617,38 +1441,15 @@ push 3
 mov qword rax, [rbp + 40]
 
 mov rax, qword [rax]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_395313404:
-cmp r9, 0
-je end_of_frame_loop_395313404
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_395313404
-end_of_frame_loop_395313404:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_395313404:
 
 
 
@@ -1656,38 +1457,15 @@ leave
 ret
 Lcont_644830334:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_882359236:
-cmp r9, 0
-je end_of_frame_loop_882359236
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_882359236
-end_of_frame_loop_882359236:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_882359236:
 
 leave
 ret
@@ -1895,7 +1673,6 @@ after_applic_98100301:
 
 cmp rax, SOB_FALSE_ADDRESS
 je Lelse_681013979
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -1905,42 +1682,18 @@ push rax
 
 push 1
 mov rax, qword [fvar_tbl + 8*23]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_44907061:
-cmp r9, 0
-je end_of_frame_loop_44907061
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_44907061
-end_of_frame_loop_44907061:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_44907061:
 
 jmp Lexit_937227572
 Lelse_681013979:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -2019,7 +1772,6 @@ jmp Lcont_566618411
 Lcode_566618411:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -2092,75 +1844,29 @@ push rax
 
 push 3
 mov rax, qword [fvar_tbl + 8*31]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_832502760:
-cmp r9, 0
-je end_of_frame_loop_832502760
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_832502760
-end_of_frame_loop_832502760:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_832502760:
 
 leave
 ret
 Lcont_566618411:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_274455462:
-cmp r9, 0
-je end_of_frame_loop_274455462
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_274455462
-end_of_frame_loop_274455462:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_274455462:
 
 Lexit_937227572:
 
@@ -2366,7 +2072,6 @@ body_of_opt_301578941:
 mov rbp, r14
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -2454,7 +2159,6 @@ mov qword rax, [rbp + 32]
 
 jmp Lexit_866852534
 Lelse_808498156:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -2476,38 +2180,15 @@ push 3
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 8]
 mov rax, qword [rax + 8]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_735962992:
-cmp r9, 0
-je end_of_frame_loop_735962992
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_735962992
-end_of_frame_loop_735962992:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_735962992:
 
 Lexit_866852534:
 
@@ -2522,38 +2203,15 @@ push 3
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 8]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_658392294:
-cmp r9, 0
-je end_of_frame_loop_658392294
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_658392294
-end_of_frame_loop_658392294:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_658392294:
 mov rbx, [rsp + 8]
 
 leave
@@ -2737,7 +2395,6 @@ jmp Lcont_196223014
 Lcode_196223014:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -2891,7 +2548,6 @@ after_applic_909437959:
 
 cmp rax, SOB_FALSE_ADDRESS
 je Lelse_96734197
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -2920,38 +2576,15 @@ push rax
 
 push 1
 mov rax, qword [fvar_tbl + 8*37]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_661528186:
-cmp r9, 0
-je end_of_frame_loop_661528186
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_661528186
-end_of_frame_loop_661528186:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_661528186:
 
 jmp Lexit_107290671
 Lelse_96734197:
@@ -2977,38 +2610,15 @@ leave
 ret
 Lcont_700349737:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_170783178:
-cmp r9, 0
-je end_of_frame_loop_170783178
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_170783178
-end_of_frame_loop_170783178:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_170783178:
 
 leave
 ret
@@ -3094,7 +2704,6 @@ jmp Lcont_888483189
 Lcode_888483189:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -3155,7 +2764,6 @@ jmp Lcont_402949384
 Lcode_402949384:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -3171,38 +2779,15 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 8]
 mov rax, qword [rax + 8]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_267491446:
-cmp r9, 0
-je end_of_frame_loop_267491446
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_267491446
-end_of_frame_loop_267491446:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_267491446:
 
 leave
 ret
@@ -3215,38 +2800,15 @@ push 3
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 0]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_929852288:
-cmp r9, 0
-je end_of_frame_loop_929852288
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_929852288
-end_of_frame_loop_929852288:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_929852288:
 
 leave
 ret
@@ -3485,7 +3047,6 @@ after_applic_698633168:
 
 cmp rax, SOB_FALSE_ADDRESS
 je Lelse_763661805
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -3501,42 +3062,18 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 16]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_572162651:
-cmp r9, 0
-je end_of_frame_loop_572162651
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_572162651
-end_of_frame_loop_572162651:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_572162651:
 
 jmp Lexit_976927359
 Lelse_763661805:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -3571,38 +3108,15 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 16]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_725956947:
-cmp r9, 0
-je end_of_frame_loop_725956947
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_725956947
-end_of_frame_loop_725956947:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_725956947:
 
 Lexit_976927359:
 mov rbx, [rsp + 8]
@@ -3745,7 +3259,6 @@ after_applic_926039712:
 
 cmp rax, SOB_FALSE_ADDRESS
 jne Lexit_974805207
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -3757,38 +3270,15 @@ push 1
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 8]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_996131318:
-cmp r9, 0
-je end_of_frame_loop_996131318
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_996131318
-end_of_frame_loop_996131318:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_996131318:
 
 Lexit_974805207:
 
@@ -4002,7 +3492,6 @@ body_of_opt_946550165:
 mov rbp, r14
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -4024,38 +3513,15 @@ push 3
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 0]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_795791525:
-cmp r9, 0
-je end_of_frame_loop_795791525
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_795791525
-end_of_frame_loop_795791525:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_795791525:
 mov rbx, [rsp + 8]
 
 leave
@@ -4268,7 +3734,6 @@ body_of_opt_399233363:
 mov rbp, r14
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -4290,38 +3755,15 @@ push 3
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 0]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_222968330:
-cmp r9, 0
-je end_of_frame_loop_222968330
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_222968330
-end_of_frame_loop_222968330:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_222968330:
 mov rbx, [rsp + 8]
 
 leave
@@ -4565,7 +4007,6 @@ after_applic_45872671:
 
 cmp rax, SOB_FALSE_ADDRESS
 je Lelse_988084389
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -4581,42 +4022,18 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 8]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_469797467:
-cmp r9, 0
-je end_of_frame_loop_469797467
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_469797467
-end_of_frame_loop_469797467:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_469797467:
 
 jmp Lexit_885606344
 Lelse_988084389:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -4657,38 +4074,15 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 8]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_491303945:
-cmp r9, 0
-je end_of_frame_loop_491303945
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_491303945
-end_of_frame_loop_491303945:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_491303945:
 
 Lexit_885606344:
 mov rbx, [rsp + 8]
@@ -4934,7 +4328,6 @@ after_applic_264763085:
 
 cmp rax, SOB_FALSE_ADDRESS
 je Lelse_380853348
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -4950,42 +4343,18 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 8]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_465023326:
-cmp r9, 0
-je end_of_frame_loop_465023326
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_465023326
-end_of_frame_loop_465023326:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_465023326:
 
 jmp Lexit_403884646
 Lelse_380853348:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -5026,38 +4395,15 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 8]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_565526397:
-cmp r9, 0
-je end_of_frame_loop_565526397
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_565526397
-end_of_frame_loop_565526397:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_565526397:
 
 Lexit_403884646:
 mov rbx, [rsp + 8]
@@ -5114,7 +4460,6 @@ jmp Lcont_182772876
 Lcode_182772876:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -5426,7 +4771,6 @@ after_applic_361404286:
 
 cmp rax, SOB_FALSE_ADDRESS
 je Lelse_613964162
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -5469,38 +4813,15 @@ push 3
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 8]
 mov rax, qword [rax + 32]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_23684769:
-cmp r9, 0
-je end_of_frame_loop_23684769
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_23684769
-end_of_frame_loop_23684769:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_23684769:
 
 jmp Lexit_47888016
 Lelse_613964162:
@@ -5533,38 +4854,15 @@ leave
 ret
 Lcont_139596420:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_650329590:
-cmp r9, 0
-je end_of_frame_loop_650329590
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_650329590
-end_of_frame_loop_650329590:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_650329590:
 
 leave
 ret
@@ -5609,7 +4907,6 @@ jmp Lcont_384027154
 Lcode_384027154:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -5800,7 +5097,6 @@ after_applic_421021563:
 
 cmp rax, SOB_FALSE_ADDRESS
 je Lelse_991360546
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -5856,38 +5152,15 @@ mov rax, qword [rax + 0]
 mov rax, qword [rax + 0]
 
 mov rax, qword [rax]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_226304471:
-cmp r9, 0
-je end_of_frame_loop_226304471
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_226304471
-end_of_frame_loop_226304471:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_226304471:
 
 jmp Lexit_777214754
 Lelse_991360546:
@@ -6079,7 +5352,6 @@ body_of_opt_691104538:
 mov rbp, r14
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -6097,38 +5369,15 @@ mov rax, qword [rax + 0]
 mov rax, qword [rax + 0]
 
 mov rax, qword [rax]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_541256566:
-cmp r9, 0
-je end_of_frame_loop_541256566
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_541256566
-end_of_frame_loop_541256566:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_541256566:
 mov rbx, [rsp + 8]
 
 leave
@@ -6142,38 +5391,15 @@ leave
 ret
 Lcont_483417528:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_116195277:
-cmp r9, 0
-je end_of_frame_loop_116195277
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_116195277
-end_of_frame_loop_116195277:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_116195277:
 
 leave
 ret
@@ -6226,7 +5452,6 @@ jmp Lcont_538829788
 Lcode_538829788:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -6420,7 +5645,6 @@ after_applic_918145467:
 
 cmp rax, SOB_FALSE_ADDRESS
 jne Lexit_53231182
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -6455,38 +5679,15 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 8]
 mov rax, qword [rax + 16]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_441436369:
-cmp r9, 0
-je end_of_frame_loop_441436369
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_441436369
-end_of_frame_loop_441436369:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_441436369:
 
 Lexit_53231182:
 
@@ -6508,7 +5709,6 @@ after_applic_567875788:
 
 cmp rax, SOB_FALSE_ADDRESS
 je Lelse_933494370
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -6564,38 +5764,15 @@ mov rax, qword [rax + 0]
 mov rax, qword [rax + 0]
 
 mov rax, qword [rax]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_338771299:
-cmp r9, 0
-je end_of_frame_loop_338771299
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_338771299
-end_of_frame_loop_338771299:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_338771299:
 
 jmp Lexit_514988712
 Lelse_933494370:
@@ -6787,7 +5964,6 @@ body_of_opt_382642037:
 mov rbp, r14
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -6805,38 +5981,15 @@ mov rax, qword [rax + 0]
 mov rax, qword [rax + 0]
 
 mov rax, qword [rax]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_486015704:
-cmp r9, 0
-je end_of_frame_loop_486015704
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_486015704
-end_of_frame_loop_486015704:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_486015704:
 mov rbx, [rsp + 8]
 
 leave
@@ -6850,38 +6003,15 @@ leave
 ret
 Lcont_98695905:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_151124289:
-cmp r9, 0
-je end_of_frame_loop_151124289
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_151124289
-end_of_frame_loop_151124289:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_151124289:
 
 leave
 ret
@@ -6963,7 +6093,6 @@ jmp Lcont_895730577
 Lcode_895730577:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -6979,38 +6108,15 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 0]
 mov rax, qword [rax + 0]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_66750478:
-cmp r9, 0
-je end_of_frame_loop_66750478
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_66750478
-end_of_frame_loop_66750478:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_66750478:
 
 leave
 ret
@@ -7109,7 +6215,6 @@ jmp Lcont_81478918
 Lcode_81478918:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -7258,7 +6363,6 @@ mov qword rax, [rbp + 40]
 
 jmp Lexit_363499359
 Lelse_460100181:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -7345,38 +6449,15 @@ mov rax, qword [rax + 0]
 mov rax, qword [rax + 0]
 
 mov rax, qword [rax]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_578335420:
-cmp r9, 0
-je end_of_frame_loop_578335420
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_578335420
-end_of_frame_loop_578335420:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_578335420:
 
 Lexit_363499359:
 
@@ -7392,7 +6473,6 @@ pop qword [rax]
 mov rax, SOB_VOID_ADDRESS
 
 
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -7452,38 +6532,15 @@ push 2
 mov qword rax, [rbp + 32]
 
 mov rax, qword [rax]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_271720753:
-cmp r9, 0
-je end_of_frame_loop_271720753
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_271720753
-end_of_frame_loop_271720753:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_271720753:
 
 
 
@@ -7491,38 +6548,15 @@ leave
 ret
 Lcont_562514557:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_668997420:
-cmp r9, 0
-je end_of_frame_loop_668997420
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_668997420
-end_of_frame_loop_668997420:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_668997420:
 
 leave
 ret
@@ -7600,7 +6634,6 @@ jmp Lcont_830445955
 Lcode_830445955:
 push rbp
 mov rbp, rsp
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -8334,7 +7367,6 @@ Lexit_654168528:
 
 cmp rax, SOB_FALSE_ADDRESS
 jne Lexit_427470990
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -8350,38 +7382,15 @@ push 2
 mov rax, qword [rbp + 16]
 mov rax, qword [rax + 8]
 mov rax, qword [rax + 56]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_410897316:
-cmp r9, 0
-je end_of_frame_loop_410897316
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_410897316
-end_of_frame_loop_410897316:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_410897316:
 
 Lexit_427470990:
 
@@ -8407,38 +7416,15 @@ leave
 ret
 Lcont_93771885:
 
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_667740834:
-cmp r9, 0
-je end_of_frame_loop_667740834
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_667740834
-end_of_frame_loop_667740834:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_667740834:
 
 leave
 ret
@@ -8492,7 +7478,6 @@ mov qword rax, [rbp + 40]
 
 jmp Lexit_85000187
 Lelse_528429947:
-mov r13, qword [rbp + 8]
 
 push SOB_NIL_ADDRESS
 
@@ -8561,38 +7546,15 @@ push rax
 
 push 2
 mov rax, qword [fvar_tbl + 8*32]
-push qword [rax + 1]
-push qword [rbp + 8]
-mov rsi, [rbp + 8 * 3]
-shl rsi, 3
-mov rbx, 0
-mov rbx, rbp
-add rbx, 32
-add rbx, rsi
-mov rdx, [rsp + 16]
-shl rdx, 3
-mov rcx, 0
-mov rcx, rsp
-add rcx, 24
-add rcx, rdx
-mov r9, 0
-mov r10, 0
-mov r9, [rsp + 16]
-add r9, 3
-move_move_frame_loop_967101206:
-cmp r9, 0
-je end_of_frame_loop_967101206
-mov r10, qword [rcx]
-mov qword [rbx], r10
-sub rcx, 8
-sub rbx,8
-dec r9
-jmp move_move_frame_loop_967101206
-end_of_frame_loop_967101206:
-mov r10, qword [rcx]
-mov qword [rbx], r10
-mov rsp, rbx
-jmp [rax + 9]
+
+push qword [rax + 1]			;;(*pushing env on the stack*)
+call [rax + 9]
+add rsp, 8			;;(*popping the environment pointer*)
+pop rbx			;;(*popping and saving the argument counter in rbx*)
+shl rbx, 3			;;(*now rbx holds the sum of sizes of all the arguments to pop*)
+add rsp, rbx			;;(*popping all the arguments*)
+add rsp, 8
+after_applic_967101206:
 
 Lexit_85000187:
 
@@ -8608,16 +7570,12 @@ mov rax, SOB_VOID_ADDRESS
 
 push SOB_NIL_ADDRESS
 
-mov rax, const_tbl+1
+mov rax, const_tbl+52
 
 push rax
 
-mov rax, const_tbl+130
-
-push rax
-
-push 2
-mov rax, qword [fvar_tbl + 8*32]
+push 1
+mov rax, qword [fvar_tbl + 8*20]
 
 push qword [rax + 1]			;;(*pushing env on the stack*)
 call [rax + 9]
