@@ -1,13 +1,5 @@
-(define foo
-  (lambda (x y z)
-    (lambda (a b c)
-        (+ a b c x y z))))
+(my_rev '(1 2 3 4) '())
 
-(define foo2
-    (lambda()
-        ((foo 1 2 3) 4 5 6)))
-
-(foo2)
 
 
 
