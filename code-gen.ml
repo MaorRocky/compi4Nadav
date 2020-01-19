@@ -406,9 +406,12 @@ let rec main_generate consts fvars depth expr' =
     let end_label = "Lcont_" ^ (str_num) in
     let str_num_non_opt_params = string_of_int(num_of_non_opt_params) in
     let lcode =
+      "mov rbp, r14\n" ^
       "push rbp\n" ^
       "mov rbp, rsp\n" ^
       (main_generate consts fvars (depth+1) body) ^
+      "my_stop:\n" ^
+      "mov rbx, [rsp + 8]\n" ^
       "\nleave\n" ^ 
       "ret\n" ^ 
       end_label ^ ":\n" in
@@ -455,7 +458,8 @@ let rec main_generate consts fvars depth expr' =
       "after_env_copy_" ^ (str_num) ^ ":\n" in
       (*now rbx points to ext_env*) 
     let adjust_stack =
-      "push rbp\n" ^ 
+      "push rbp\n" ^
+      "mov r14, rbp\n" ^
       "mov rbp, rsp\n" ^
       "mov rdi, " ^ (str_num_non_opt_params) ^ "\n" ^
       "mov rsi, qword [rbp + 8*3]\n" ^ (*rsi holds args_count*)
@@ -593,6 +597,7 @@ let rec main_generate consts fvars depth expr' =
     let end_label = "Lcont_" ^ (str_num) in
     let str_num_non_opt_params = string_of_int(num_of_non_opt_params) in
     let lcode =
+      "mov rbp, r14\n" ^
       "push rbp\n" ^
       "mov rbp, rsp\n" ^
       (main_generate consts fvars (depth+1) body) ^
@@ -600,7 +605,8 @@ let rec main_generate consts fvars depth expr' =
       "ret\n" ^ 
       end_label ^ ":\n" in
     let adjust_stack =
-      "push rbp\n" ^ 
+      "push rbp\n" ^
+      "mov r14, rbp\n" ^
       "mov rbp, rsp\n" ^
       "mov rdi, " ^ (str_num_non_opt_params) ^ "\n" ^
       "mov rsi, qword [rbp + 8*3]\n" ^ (*rsi holds args_count*)

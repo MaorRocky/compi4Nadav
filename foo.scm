@@ -1,1 +1,5 @@
-(apply + 1 2 3 '(4 5 6))
+(define foo
+    (lambda (x)
+        ((lambda y y) x)))
+
+(foo 1)
