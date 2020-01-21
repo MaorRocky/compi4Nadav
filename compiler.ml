@@ -86,6 +86,7 @@ main:
 " ^ (String.concat "\n" (List.map make_primitive_closure primitive_names_to_labels)) ^ "
 
 user_code_fragment:
+
 ;;; The code you compiled will be catenated here.
 ;;; It will be executed immediately after the closures for 
 ;;; the primitive procedures are set up.
@@ -103,7 +104,7 @@ exception X_missing_input_file;;
 
 try
   let infile = "foo.scm" (*Sys.argv.(1)*) in
-  let code =  (file_to_string "stdlib.scm") ^ (file_to_string infile) in
+  let code =  (*(file_to_string "stdlib.scm") ^*) (file_to_string infile) in
   let asts = string_to_asts code in
   let consts_tbl = Code_Gen.make_consts_tbl asts in
   let fvars_tbl = Code_Gen.make_fvars_tbl asts in

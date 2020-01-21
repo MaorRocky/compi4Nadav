@@ -150,6 +150,7 @@
 %endmacro
 
 %define MAKE_LITERAL_INT(val) MAKE_LITERAL T_INTEGER, dq val
+%define MAKE_LITERAL_FLOAT(val) MAKE_LITERAL T_FLOAT, dq val
 
 %define MAKE_LITERAL_CHAR(val) MAKE_LITERAL T_CHAR, db val
 

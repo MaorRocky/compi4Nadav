@@ -13,29 +13,33 @@
 
 (define fold-left
   (lambda (func init lst)
-    (let ((new_init (func init (car lst))))
-      (if (eq? (cdr lst) '())
-          new_init
-          (fold-left func new_init (cdr lst))))))
+	(if (eq? '() lst)
+            init
+            (let ((new_init (func init (car lst))))
+              (if (eq? (cdr lst) '())
+                  new_init
+                  (fold-left func new_init (cdr lst)))))))
+   
 
 (define fold-right
   (lambda (func init lst)
-    (letrec ((reversed_list (reverse lst))
+    (letrec ((reversed_list (my_rev lst '()))
              (real-fold-right (lambda (func init lst)
-                                (let ((new_init (func (car lst) init)))
-                                  (if (eq? (cdr lst) '())
-                                      new_init
-                                      (real-fold-right func new_init (cdr lst)))))))
+                                (if (eq? '() lst)
+                                    init
+                                     (let ((new_init (func (car lst) init)))
+                                       (if (eq? (cdr lst) '())
+                                           new_init
+                                           (real-fold-right func new_init (cdr lst))))))))
       (real-fold-right func init reversed_list))))
-
 (define cons*
   (lambda vs
     (if (eq? vs '())
         vs
         (if (= (length vs) 1)
             (car vs)
-            (let ((rev_list (reverse vs)))
-              (fold-right cons (car rev_list) (reverse (cdr rev_list))))))))
+            (let ((rev_list (my_rev vs '())))
+              (fold-right cons (car rev_list) (my_rev (cdr rev_list) '())))))))
 
 (define append
   (let ((null? null?)
@@ -176,3 +180,10 @@
 			     (and (string? x) (string? y) (equal?-loop (string->list x) (string->list y)))
 			     (eq? x y)))))
     equal?-loop)))
+
+
+(define my_rev
+  (lambda (lst rev_lst)
+    (if (eq? lst '())
+        rev_lst
+        (my_rev (cdr lst) (cons (car lst) rev_lst)))))
